@@ -1,0 +1,92 @@
+---
+/**
+ * Dev.to articles. Rendered at build time; Live.astro refreshes the list in
+ * the browser so a new article appears without a rebuild.
+ */
+import type { Article } from '../lib/live';
+import { devtoUser } from '../data/profile';
+
+interface Props {
+  articles: Article[];
+}
+const { articles } = Astro.props;
+const fmt = new Intl.DateTimeFormat('en-IE', { day: 'numeric', month: 'short', year: 'numeric' });
+---
+
+<section class="section" id="writing" aria-labelledby="writing-title">
+  <div class="section-head">
+    <h2 id="writing-title">Writing</h2>
+    <p>Notes from building and measuring AI security tooling, published on Dev.to.</p>
+  </div>
+
+  <ol class="articles" data-articles>
+    {
+      articles.map((a) => (
+        <li>
+          <a class="article" href={a.url} target="_blank" rel="noopener">
+            <span class="title">{a.title}</span>
+            <span class="desc">{a.description}</span>
+            <span class="meta">
+              <time datetime={a.publishedAt}>{fmt.format(new Date(a.publishedAt))}</time>, {a.readingTime} min read
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+  <p class="more">
+    <a href={`https://dev.to/${devtoUser}`} target="_blank" rel="noopener">All articles on Dev.to</a>
+  </p>
+</section>
+
+<style is:global>
+  #writing .articles {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-width: 46rem;
+    border-top: 1px solid var(--rule);
+  }
+  #writing .articles li {
+    margin: 0;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  #writing .article {
+    display: grid;
+    gap: 0.3rem;
+    padding: 1.25rem 0;
+    text-decoration: none;
+  }
+  #writing .title {
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 106;
+    font-size: var(--t-lg);
+    font-weight: 650;
+    line-height: 1.2;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 0.15em;
+    transition: text-decoration-color 120ms ease;
+  }
+  #writing .article:hover .title {
+    text-decoration-color: var(--tag);
+  }
+  #writing .desc {
+    color: var(--ink-soft);
+  }
+  #writing .meta {
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 100;
+    font-size: var(--t-sm);
+    color: var(--muted);
+  }
+  #writing .more {
+    margin-top: 1rem;
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 100;
+    font-size: var(--t-sm);
+    font-weight: 550;
+  }
+
+</style>

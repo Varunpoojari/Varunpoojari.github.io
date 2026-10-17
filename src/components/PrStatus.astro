@@ -1,0 +1,52 @@
+---
+/**
+ * Live status mark for a pull request. Rendered with the build-time state;
+ * the client script in Live.astro refreshes every [data-pr] on the page.
+ */
+import type { PrState } from '../lib/live';
+interface Props {
+  pr: string;
+  states: Record<string, PrState>;
+  fallback?: 'merged' | 'open' | 'closed';
+}
+const { pr, states, fallback = 'open' } = Astro.props;
+const state = states[pr]?.state ?? fallback;
+const text = { merged: 'Merged', open: 'In review', closed: 'Closed' };
+---
+
+<span class="pr-status" data-pr={pr} data-state={state}>
+  <span class="dot" aria-hidden="true"></span><span class="label">{text[state]}</span>
+</span>
+
+<style>
+  .pr-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    font-family: var(--display);
+    font-size: var(--t-xs);
+    font-weight: 600;
+    font-variation-settings: 'wdth' 100;
+    line-height: 1;
+    padding: 0.3em 0.55em;
+    border: 1px solid currentColor;
+    border-radius: 99px;
+    white-space: nowrap;
+    vertical-align: 0.15em;
+  }
+  .pr-status[data-state='merged'] {
+    color: var(--merged);
+  }
+  .pr-status[data-state='open'] {
+    color: var(--open);
+  }
+  .pr-status[data-state='closed'] {
+    color: var(--muted);
+  }
+  .dot {
+    width: 0.5em;
+    height: 0.5em;
+    border-radius: 50%;
+    background: currentColor;
+  }
+</style>

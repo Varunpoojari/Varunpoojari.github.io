@@ -1,0 +1,168 @@
+---
+/**
+ * Skills, laid out like an ATT&CK matrix: tactics as columns, techniques as
+ * cells. Selecting a cell shows the evidence behind it.
+ */
+import { matrix } from '../data/profile';
+---
+
+<section class="section" id="skills" aria-labelledby="skills-title">
+  <div class="section-head">
+    <h2 id="skills-title">Skills matrix</h2>
+    <p>Arranged like an ATT&amp;CK matrix. Select a skill to see where it was used.</p>
+  </div>
+
+  <div class="matrix" data-matrix>
+    {
+      matrix.map((t) => (
+        <div class="tactic" role="group" aria-labelledby={`tactic-${t.id}`}>
+          <h3 id={`tactic-${t.id}`}>
+            {t.name} <span class="count">{t.skills.length}</span>
+          </h3>
+          <ul>
+            {t.skills.map((s) => (
+              <li>
+                <button type="button" class="cell" aria-pressed="false" data-evidence={JSON.stringify(s.evidence)} data-skill={s.name}>
+                  {s.name}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+  </div>
+
+  <div class="evidence" aria-live="polite" data-evidence-panel>
+    <p class="evidence-empty">Select a skill above to see the evidence.</p>
+  </div>
+</section>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-matrix]');
+  const panel = document.querySelector<HTMLElement>('[data-evidence-panel]');
+  if (root && panel) {
+    const cells = [...root.querySelectorAll<HTMLButtonElement>('.cell')];
+    const empty = panel.innerHTML;
+    root.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.cell');
+      if (!btn) return;
+      const wasOn = btn.getAttribute('aria-pressed') === 'true';
+      cells.forEach((c) => c.setAttribute('aria-pressed', 'false'));
+      if (wasOn) {
+        panel.innerHTML = empty;
+        return;
+      }
+      btn.setAttribute('aria-pressed', 'true');
+      const evidence: string[] = JSON.parse(btn.dataset.evidence || '[]');
+      panel.replaceChildren();
+      const h = document.createElement('p');
+      h.className = 'evidence-title';
+      h.textContent = btn.dataset.skill || '';
+      const ul = document.createElement('ul');
+      evidence.forEach((item) => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        ul.append(li);
+      });
+      panel.append(h, ul);
+    });
+  }
+</script>
+
+<style>
+  .matrix {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    gap: 0;
+    border-top: 1px solid var(--rule);
+    border-left: 1px solid var(--rule);
+  }
+  @media (min-width: 84rem) {
+    .matrix {
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+    }
+    .cell {
+      font-size: var(--t-xs);
+    }
+  }
+  .tactic {
+    background: var(--paper);
+    padding: 0 0 0.5rem;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .tactic h3 {
+    font-size: var(--t-sm);
+    font-variation-settings: 'wdth' 112;
+    font-weight: 750;
+    padding: 0.7rem 0.75rem;
+    background: var(--ink);
+    color: var(--paper);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .count {
+    font-weight: 500;
+    opacity: 0.7;
+  }
+  .tactic ul {
+    list-style: none;
+    padding: 0.5rem 0.5rem 0;
+    margin: 0;
+    display: grid;
+    gap: 0.35rem;
+  }
+  .tactic li {
+    margin: 0;
+  }
+  .cell {
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 96;
+    font-size: var(--t-sm);
+    font-weight: 500;
+    line-height: 1.25;
+    color: var(--ink);
+    background: var(--paper-raised);
+    border: 1px solid var(--rule-soft);
+    border-radius: var(--radius);
+    padding: 0.45rem 0.55rem;
+    cursor: pointer;
+    transition: background-color 120ms ease, border-color 120ms ease;
+  }
+  .cell:hover {
+    border-color: var(--ink-soft);
+  }
+  .cell[aria-pressed='true'] {
+    background: var(--tag);
+    border-color: var(--tag);
+    color: var(--tag-ink);
+    font-weight: 650;
+  }
+
+  .evidence {
+    margin-top: 1rem;
+    min-height: 5.5rem;
+    padding: 1rem 1.25rem;
+    border-left: 3px solid var(--tag);
+    background: var(--paper-raised);
+    max-width: var(--measure);
+  }
+  .evidence :global(.evidence-empty) {
+    color: var(--muted);
+    margin: 0;
+  }
+  .evidence :global(.evidence-title) {
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 108;
+    font-weight: 700;
+    margin: 0 0 0.35rem;
+  }
+  .evidence :global(ul) {
+    margin: 0;
+  }
+</style>

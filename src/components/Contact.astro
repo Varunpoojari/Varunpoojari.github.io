@@ -1,0 +1,119 @@
+---
+import { person } from '../data/profile';
+---
+
+<section class="section contact" id="contact" aria-labelledby="contact-title">
+  <div class="section-head">
+    <h2 id="contact-title">Get in touch</h2>
+    <p>{person.seeking}</p>
+  </div>
+
+  <div class="contact-body">
+    <a class="email" href={`mailto:${person.email}`}>{person.email}</a>
+    <button type="button" class="copy" data-copy={person.email}>Copy address</button>
+    <p class="rights">{person.workRights}</p>
+    <ul class="links">
+      {
+        person.links.map((l) => (
+          <li>
+            <a href={l.href} target="_blank" rel="me noopener">
+              {l.label}
+            </a>
+            <span class="handle">{l.handle}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>
+    Built with Astro, hosted on GitHub Pages. Project and article data refresh from GitHub and Dev.to.{' '}
+    <a href="https://github.com/Varunpoojari/Varunpoojari.github.io" target="_blank" rel="noopener">View the source</a>.
+  </p>
+</footer>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const label = btn.textContent;
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copy || '');
+        btn.textContent = 'Copied';
+      } catch {
+        btn.textContent = 'Copy failed: select the address instead';
+      }
+      setTimeout(() => (btn.textContent = label), 2000);
+    });
+  });
+</script>
+
+<style>
+  .contact-body {
+    display: grid;
+    justify-items: start;
+    gap: 0.75rem;
+  }
+  .email {
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 118;
+    font-weight: 750;
+    font-size: clamp(1.4rem, 4.5vw, 2.6rem);
+    letter-spacing: -0.02em;
+    text-decoration-color: var(--tag);
+    text-decoration-thickness: 4px;
+    text-underline-offset: 0.15em;
+    word-break: break-all;
+  }
+  .copy {
+    font: inherit;
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 100;
+    font-size: var(--t-sm);
+    font-weight: 600;
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--ink-soft);
+    border-radius: var(--radius);
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+  }
+  .copy:hover {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .rights {
+    color: var(--muted);
+    margin: 0.5rem 0 0;
+  }
+  .links {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 0.75rem 2rem;
+    width: 100%;
+  }
+  .links li {
+    display: grid;
+    margin: 0;
+  }
+  .links a {
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 104;
+    font-weight: 650;
+  }
+  .handle {
+    font-size: var(--t-sm);
+    color: var(--muted);
+  }
+  .footer {
+    margin-top: 5rem;
+    padding: 1.5rem 0 2.5rem;
+    border-top: 1px solid var(--rule);
+    font-size: var(--t-sm);
+    color: var(--muted);
+  }
+</style>

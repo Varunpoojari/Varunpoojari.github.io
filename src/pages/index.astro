@@ -1,0 +1,48 @@
+---
+import Base from '../layouts/Base.astro';
+import Rail from '../components/Rail.astro';
+import Hero from '../components/Hero.astro';
+import Timeline from '../components/Timeline.astro';
+import Work from '../components/Work.astro';
+import Ledger from '../components/Ledger.astro';
+import Matrix from '../components/Matrix.astro';
+import Writing from '../components/Writing.astro';
+import Credentials from '../components/Credentials.astro';
+import Places from '../components/Places.astro';
+import Contact from '../components/Contact.astro';
+import Palette from '../components/Palette.astro';
+import Live from '../components/Live.astro';
+import { getRepos, getPrStates, getArticles } from '../lib/live';
+
+const [repos, prs, articles] = await Promise.all([getRepos(), getPrStates(), getArticles()]);
+---
+
+<Base>
+  <Rail />
+  <main id="main" class="page">
+    <Hero prs={prs} />
+    <Timeline prs={prs} />
+    <Work repos={repos} />
+    <Ledger prs={prs} />
+    <Matrix />
+    <Writing articles={articles} />
+    <Credentials />
+    <Places />
+    <Contact />
+  </main>
+  <Palette />
+  <Live />
+</Base>
+
+<style>
+  .page {
+    padding-inline: var(--gutter);
+    max-width: 66rem;
+  }
+  @media (min-width: 64rem) {
+    .page {
+      margin-left: var(--rail);
+      padding-inline: clamp(2.5rem, 5vw, 5rem);
+    }
+  }
+</style>

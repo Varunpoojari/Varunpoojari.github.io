@@ -1,0 +1,223 @@
+/*
+ * Design tokens: "Case file"
+ * A cool lab-bench paper, ink, and one evidence-tag yellow used only for tags,
+ * focus and live-status marks. Archivo (variable width) carries structure;
+ * Source Serif 4 carries reading; JetBrains Mono appears only on real
+ * identifiers such as PR numbers and hashes.
+ */
+@import '@fontsource-variable/archivo/wdth.css';
+@import '@fontsource-variable/source-serif-4/opsz.css';
+@import '@fontsource-variable/source-serif-4/opsz-italic.css';
+@import '@fontsource-variable/jetbrains-mono/index.css';
+
+:root {
+  --paper: #eef1f3;
+  --paper-raised: #f8f9fa;
+  --ink: #142029;
+  --ink-soft: #3a4a57;
+  --muted: #5d6b77;
+  --rule: #c6cfd6;
+  --rule-soft: #dce2e7;
+  --tag: #f2c230;
+  --tag-ink: #1b1607;
+  --merged: #2f6f4f;
+  --open: #8a5a00;
+  --land: #cfd7dd;
+  --land-visited: #142029;
+
+  --display: 'Archivo Variable', 'Arial Narrow', system-ui, sans-serif;
+  --serif: 'Source Serif 4 Variable', Georgia, 'Times New Roman', serif;
+  --mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* Type scale: perfect fourth from 17px body */
+  --t-xs: 0.8125rem;
+  --t-sm: 0.9375rem;
+  --t-md: 1.0625rem;
+  --t-lg: 1.375rem;
+  --t-xl: 1.875rem;
+  --t-2xl: 2.5rem;
+  --t-3xl: clamp(2.75rem, 7vw, 5.25rem);
+
+  --rail: 15rem;
+  --measure: 40rem;
+  --gutter: clamp(1rem, 4vw, 3rem);
+  --radius: 3px;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #11171e;
+    --paper-raised: #172029;
+    --ink: #e4e9ed;
+    --ink-soft: #c2ccd4;
+    --muted: #8f9ca8;
+    --rule: #2d3945;
+    --rule-soft: #222c36;
+    --merged: #6cc296;
+    --open: #e9b649;
+    --land: #263240;
+    --land-visited: #e4e9ed;
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --paper: #11171e;
+  --paper-raised: #172029;
+  --ink: #e4e9ed;
+  --ink-soft: #c2ccd4;
+  --muted: #8f9ca8;
+  --rule: #2d3945;
+  --rule-soft: #222c36;
+  --merged: #6cc296;
+  --open: #e9b649;
+  --land: #263240;
+  --land-visited: #e4e9ed;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scroll-padding-top: 1.5rem;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: var(--t-md);
+  line-height: 1.6;
+  font-optical-sizing: auto;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--display);
+  font-weight: 650;
+  line-height: 1.15;
+  margin: 0;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0 0 1em;
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: var(--rule);
+  transition: text-decoration-color 120ms ease, background-color 120ms ease;
+}
+a:hover {
+  text-decoration-color: var(--ink);
+}
+
+:focus-visible {
+  outline: 3px solid var(--tag);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+code,
+.mono {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  letter-spacing: -0.01em;
+}
+
+ul {
+  padding-left: 1.1em;
+  margin: 0 0 1em;
+}
+li {
+  margin-bottom: 0.35em;
+}
+li::marker {
+  color: var(--muted);
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 50;
+  background: var(--tag);
+  color: var(--tag-ink);
+  padding: 0.5rem 0.9rem;
+  font-family: var(--display);
+  text-decoration: none;
+}
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* Section heading: wide Archivo, a short tag-yellow tab on the left edge. */
+.section {
+  padding-block: clamp(3.5rem, 8vw, 6rem) 0;
+}
+.section-head {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 2rem;
+  max-width: var(--measure);
+}
+.section-head h2 {
+  font-size: var(--t-2xl);
+  font-variation-settings: 'wdth' 118;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+.section-head p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.prose {
+  max-width: var(--measure);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

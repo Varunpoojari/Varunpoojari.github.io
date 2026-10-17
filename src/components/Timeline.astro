@@ -1,0 +1,210 @@
+---
+/**
+ * Case history. Each era is an exhibit, lettered in order from the most
+ * recent. Eras open with a line drawing of the city, then the role, then the
+ * dated events that happened during it.
+ */
+import { eras } from '../data/profile';
+import Skyline from './Skyline.astro';
+import PrStatus from './PrStatus.astro';
+import type { PrState } from '../lib/live';
+
+interface Props {
+  prs: Record<string, PrState>;
+}
+const { prs } = Astro.props;
+const letter = (i: number) => String.fromCharCode(66 + i); // A is the hero tag
+---
+
+<section class="section timeline" id="history" aria-labelledby="history-title">
+  <div class="section-head">
+    <h2 id="history-title">Case history</h2>
+    <p>Roles, study and the work that happened during each, most recent first.</p>
+  </div>
+
+  <ol class="eras">
+    {
+      eras.map((era, i) => (
+        <li class="era" id={era.id} data-era>
+          <Skyline city={era.city} />
+          <div class="era-head">
+            <span class="exhibit" aria-label={`Exhibit ${letter(i)}`}>
+              {letter(i)}
+            </span>
+            <div>
+              <h3>{era.title}</h3>
+              <p class="org">
+                {era.org}, {era.place}
+              </p>
+              <p class="period">
+                <time>{era.period}</time>
+              </p>
+            </div>
+          </div>
+
+          <div class="era-body prose">
+            {era.summary && <p>{era.summary}</p>}
+            {era.points && (
+              <ul>
+                {era.points.map((p) => (
+                  <li>{p}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {era.entries && (
+            <ol class="entries">
+              {era.entries.map((e) => (
+                <li class="entry">
+                  <p class="entry-date">
+                    <time>{e.date}</time>
+                  </p>
+                  <div class="entry-main">
+                    <h4>
+                      {e.title}
+                      {e.pr && (
+                        <>
+                          {' '}
+                          <PrStatus pr={e.pr} states={prs} />
+                        </>
+                      )}
+                    </h4>
+                    <p>{e.body}</p>
+                    {e.links && (
+                      <p class="entry-links">
+                        {e.links.map((l) => (
+                          <a
+                            href={l.href}
+                            {...(l.href.startsWith('http') ? { target: '_blank', rel: 'noopener' } : {})}
+                          >
+                            {l.label}
+                          </a>
+                        ))}
+                      </p>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .eras {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .era {
+    padding: 2.5rem 0 3rem;
+    border-top: 1px solid var(--rule);
+    margin: 0;
+  }
+  .era:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .era-head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    align-items: start;
+    margin-bottom: 1.25rem;
+  }
+  .exhibit {
+    display: grid;
+    place-items: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 120;
+    font-weight: 800;
+    font-size: var(--t-lg);
+    background: var(--tag);
+    color: var(--tag-ink);
+    clip-path: polygon(0.6rem 0, 100% 0, 100% 100%, 0.6rem 100%, 0 calc(100% - 0.6rem), 0 0.6rem);
+  }
+  .era-head h3 {
+    font-size: var(--t-xl);
+    font-variation-settings: 'wdth' 108;
+    letter-spacing: -0.01em;
+  }
+  .org {
+    margin: 0.2rem 0 0;
+    font-size: var(--t-lg);
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+  .period {
+    margin: 0.25rem 0 0;
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 100;
+    font-size: var(--t-sm);
+    color: var(--muted);
+  }
+
+  .entries {
+    list-style: none;
+    padding: 0;
+    margin: 1.75rem 0 0;
+    max-width: 46rem;
+  }
+  .entry {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+    padding: 1.1rem 0 0.4rem 1.25rem;
+    border-left: 2px solid var(--rule);
+    margin: 0;
+    position: relative;
+  }
+  .entry::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: 1.45rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 2px solid var(--ink-soft);
+  }
+  @media (min-width: 46rem) {
+    .entry {
+      grid-template-columns: 7.5rem 1fr;
+      gap: 1.25rem;
+    }
+  }
+  .entry-date {
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 100;
+    font-size: var(--t-sm);
+    font-weight: 600;
+    color: var(--muted);
+    margin: 0.1rem 0 0;
+  }
+  .entry h4 {
+    font-size: var(--t-lg);
+    font-variation-settings: 'wdth' 100;
+    font-weight: 650;
+    margin-bottom: 0.4rem;
+  }
+  .entry p {
+    max-width: var(--measure);
+  }
+  .entry-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.1rem;
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 100;
+    font-size: var(--t-sm);
+    font-weight: 550;
+  }
+</style>

@@ -1,0 +1,103 @@
+---
+/**
+ * Client-side refresh. The page ships with build-time data; this script
+ * re-checks PR status, repo stats and Dev.to articles in the visitor's
+ * browser and quietly keeps the built values if any request fails.
+ * Results are cached in sessionStorage for 30 minutes to stay well under
+ * GitHub's anonymous rate limit.
+ */
+import { githubUser, devtoUser } from '../data/profile';
+---
+
+<script define:vars={{ githubUser, devtoUser }}>
+  (() => {
+    const TTL = 30 * 60 * 1000;
+    const cached = async (key, url) => {
+      try {
+        const hit = JSON.parse(sessionStorage.getItem(key) || 'null');
+        if (hit && Date.now() - hit.t < TTL) return hit.v;
+      } catch {}
+      const res = await fetch(url, { headers: { Accept: 'application/json' } });
+      if (!res.ok) throw new Error(String(res.status));
+      const v = await res.json();
+      try {
+        sessionStorage.setItem(key, JSON.stringify({ t: Date.now(), v }));
+      } catch {}
+      return v;
+    };
+    const label = { merged: 'Merged', open: 'In review', closed: 'Closed' };
+
+    // Pull request status.
+    cached('prs', `https://api.github.com/search/issues?q=author:${githubUser}+type:pr&per_page=100`)
+      .then((data) => {
+        const states = {};
+        for (const i of data.items || []) {
+          const key = `${i.repository_url.replace('https://api.github.com/repos/', '')}#${i.number}`;
+          states[key] = i.pull_request && i.pull_request.merged_at ? 'merged' : i.state === 'open' ? 'open' : 'closed';
+        }
+        document.querySelectorAll('[data-pr]').forEach((el) => {
+          const s = states[el.dataset.pr];
+          if (!s) return;
+          el.dataset.state = s;
+          const l = el.querySelector('.label');
+          if (l) l.textContent = label[s];
+        });
+        const count = document.querySelector('[data-merged-count]');
+        if (count) {
+          const rows = [...document.querySelectorAll('#open-source [data-pr]')];
+          count.textContent = String(rows.filter((r) => r.dataset.state === 'merged').length);
+        }
+      })
+      .catch(() => {});
+
+    // Repository stats.
+    cached('repos', `https://api.github.com/users/${githubUser}/repos?per_page=100`)
+      .then((repos) => {
+        const fmt = new Intl.DateTimeFormat('en-IE', { month: 'short', year: 'numeric' });
+        const byName = Object.fromEntries(repos.map((r) => [r.name, r]));
+        document.querySelectorAll('[data-repo]').forEach((el) => {
+          const r = byName[el.dataset.repo];
+          if (!r) return;
+          const stars = el.querySelector('[data-stars]');
+          if (stars) stars.textContent = String(r.stargazers_count);
+          const pushed = el.querySelector('[data-pushed]');
+          if (pushed && r.pushed_at) pushed.textContent = fmt.format(new Date(r.pushed_at));
+        });
+      })
+      .catch(() => {});
+
+    // Dev.to articles: add any published since the last build.
+    cached('articles', `https://dev.to/api/articles?username=${devtoUser}&per_page=30`)
+      .then((articles) => {
+        const list = document.querySelector('[data-articles]');
+        if (!list || !Array.isArray(articles)) return;
+        const known = new Set([...list.querySelectorAll('a')].map((a) => a.href));
+        const fmt = new Intl.DateTimeFormat('en-IE', { day: 'numeric', month: 'short', year: 'numeric' });
+        articles
+          .filter((a) => !known.has(a.url))
+          .reverse()
+          .forEach((a) => {
+            const li = document.createElement('li');
+            const link = document.createElement('a');
+            link.className = 'article';
+            link.href = a.url;
+            link.target = '_blank';
+            link.rel = 'noopener';
+            const parts = [
+              ['title', a.title],
+              ['desc', a.description],
+              ['meta', `${fmt.format(new Date(a.published_at))}, ${a.reading_time_minutes} min read`],
+            ];
+            for (const [cls, text] of parts) {
+              const s = document.createElement('span');
+              s.className = cls;
+              s.textContent = text;
+              link.append(s);
+            }
+            li.append(link);
+            list.prepend(li);
+          });
+      })
+      .catch(() => {});
+  })();
+</script>

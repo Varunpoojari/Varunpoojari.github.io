@@ -1,0 +1,228 @@
+---
+/**
+ * Selected work. Featured projects get a full write-up drawn from the code;
+ * the rest sit in a compact index. Stars, language and last-push date come
+ * from the GitHub API at build time.
+ */
+import { projects, githubUser } from '../data/profile';
+import type { RepoStats } from '../lib/live';
+
+interface Props {
+  repos: Record<string, RepoStats>;
+}
+const { repos } = Astro.props;
+const featured = projects.filter((p) => p.featured);
+const rest = projects.filter((p) => !p.featured);
+const fmt = new Intl.DateTimeFormat('en-IE', { month: 'short', year: 'numeric' });
+const pushed = (name: string) => (repos[name]?.pushedAt ? fmt.format(new Date(repos[name].pushedAt)) : null);
+const repoUrl = (name: string) => `https://github.com/${githubUser}/${name}`;
+const areaName = { ai: 'AI security', forensics: 'Forensics', detection: 'Detection', offense: 'Offensive testing' };
+---
+
+<section class="section" id="work" aria-labelledby="work-title">
+  <div class="section-head">
+    <h2 id="work-title">Selected work</h2>
+    <p>What each tool does, described from its source code.</p>
+  </div>
+
+  <ol class="featured">
+    {
+      featured.map((p) => (
+        <li class="project" data-repo={p.repo}>
+          <div class="project-meta">
+            <p class="area">{areaName[p.area]}</p>
+            <h3>
+              <a href={repoUrl(p.repo)} target="_blank" rel="noopener">
+                {p.name}
+              </a>
+            </h3>
+            <p class="what">{p.what}</p>
+            <p class="stack">{p.stack.join(', ')}</p>
+            <dl class="stats">
+              {repos[p.repo]?.stars > 0 && (
+                <div>
+                  <dt>Stars</dt>
+                  <dd data-stars>{repos[p.repo].stars}</dd>
+                </div>
+              )}
+              {pushed(p.repo) && (
+                <div>
+                  <dt>Last push</dt>
+                  <dd data-pushed>{pushed(p.repo)}</dd>
+                </div>
+              )}
+            </dl>
+            <p class="project-links">
+              <a href={repoUrl(p.repo)} target="_blank" rel="noopener">
+                Source
+              </a>
+              {p.live && (
+                <a href={p.live} target="_blank" rel="noopener">
+                  Live demo
+                </a>
+              )}
+            </p>
+          </div>
+          <ul class="how">
+            {p.how.map((h) => (
+              <li>{h}</li>
+            ))}
+          </ul>
+        </li>
+      ))
+    }
+  </ol>
+
+  <h3 class="index-title">More tools</h3>
+  <ul class="index">
+    {
+      rest.map((p) => (
+        <li>
+          <a href={repoUrl(p.repo)} target="_blank" rel="noopener">
+            {p.name}
+          </a>
+          <span class="index-what">{p.what} {p.how[0]}</span>
+          <span class="index-stack">{p.stack.join(', ')}</span>
+        </li>
+      ))
+    }
+  </ul>
+  <p class="all-repos">
+    <a href={`https://github.com/${githubUser}?tab=repositories`} target="_blank" rel="noopener">All repositories on GitHub</a>
+  </p>
+</section>
+
+<style>
+  .featured {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .project {
+    display: grid;
+    gap: 1rem 2.5rem;
+    padding: 2rem 0;
+    border-top: 1px solid var(--rule);
+    margin: 0;
+  }
+  @media (min-width: 58rem) {
+    .project {
+      grid-template-columns: 17rem minmax(0, 1fr);
+    }
+  }
+  .area {
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 100;
+    font-size: var(--t-xs);
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 0.35rem;
+  }
+  .project h3 {
+    font-size: var(--t-xl);
+    font-variation-settings: 'wdth' 112;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.5rem;
+  }
+  .project h3 a {
+    text-decoration: none;
+  }
+  .project h3 a:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--tag);
+    text-decoration-thickness: 3px;
+  }
+  .what {
+    font-style: italic;
+    color: var(--ink-soft);
+    margin-bottom: 0.6rem;
+  }
+  .stack {
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 100;
+    font-size: var(--t-sm);
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+  }
+  .stats {
+    display: flex;
+    gap: 1.5rem;
+    margin: 0 0 0.6rem;
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 100;
+    font-size: var(--t-sm);
+  }
+  .stats div {
+    display: grid;
+  }
+  .stats dt {
+    color: var(--muted);
+    font-size: var(--t-xs);
+  }
+  .stats dd {
+    margin: 0;
+    font-weight: 600;
+  }
+  .project-links {
+    display: flex;
+    gap: 1.1rem;
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 100;
+    font-size: var(--t-sm);
+    font-weight: 550;
+    margin: 0;
+  }
+  .how {
+    margin: 0;
+    max-width: var(--measure);
+  }
+  .how li {
+    margin-bottom: 0.7em;
+  }
+
+  .index-title {
+    font-size: var(--t-lg);
+    font-variation-settings: 'wdth' 108;
+    margin: 2.5rem 0 0.75rem;
+  }
+  .index {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: 1px solid var(--rule);
+  }
+  .index li {
+    display: grid;
+    gap: 0.2rem 1.5rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+    margin: 0;
+  }
+  @media (min-width: 58rem) {
+    .index li {
+      grid-template-columns: 17rem minmax(0, 1fr) 11rem;
+    }
+  }
+  .index a {
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 106;
+    font-weight: 650;
+  }
+  .index-what {
+    font-size: var(--t-sm);
+    color: var(--ink-soft);
+  }
+  .index-stack {
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 100;
+    font-size: var(--t-sm);
+    color: var(--muted);
+  }
+  .all-repos {
+    margin-top: 1rem;
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 100;
+    font-size: var(--t-sm);
+    font-weight: 550;
+  }
+</style>

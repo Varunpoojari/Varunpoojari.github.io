@@ -1,0 +1,210 @@
+---
+/**
+ * Hero. The one orchestrated moment on the page: redaction bars over the
+ * name and introduction decay away on a half-life schedule (each bar clears
+ * after half the remaining time of the one before), a nod to MemHalfLife.
+ * The text underneath is always real and readable by assistive tech.
+ */
+import { person } from '../data/profile';
+import PrStatus from './PrStatus.astro';
+import type { PrState } from '../lib/live';
+
+interface Props {
+  prs: Record<string, PrState>;
+}
+const { prs } = Astro.props;
+
+// Half-life schedule: delays shrink geometrically, so the reveal accelerates.
+const halfLife = (i: number) => Math.round(900 * (1 - Math.pow(0.5, i)) + 120);
+const introLines = [
+  'I test LLM applications for prompt injection, data leakage',
+  'and unsafe agent integrations, and contribute detection',
+  'content and red-teaming tools to open source.',
+];
+---
+
+<header class="hero" id="top">
+  <div class="hero-text">
+    <p class="role">{person.role}, Dublin</p>
+    <h1 class="name">
+      <span class="redact" style={`--d:${halfLife(0)}ms`}>Varun</span>
+      <span class="redact" style={`--d:${halfLife(1)}ms`}>Poojari</span>
+    </h1>
+    <p class="intro">
+      {
+        introLines.map((line, i) => (
+          <span class="redact line" style={`--d:${halfLife(i + 2)}ms`}>
+            {line}{' '}
+          </span>
+        ))
+      }
+    </p>
+    <p class="seeking">{person.seeking}</p>
+    <ul class="links" aria-label="Profiles">
+      {
+        person.links.map((l) => (
+          <li>
+            <a href={l.href} rel="me noopener" target="_blank">
+              {l.label}
+            </a>
+          </li>
+        ))
+      }
+      <li><a href={`mailto:${person.email}`}>Email</a></li>
+    </ul>
+  </div>
+
+  <a class="exhibit-tag" href="https://github.com/microsoft/PyRIT/pull/3028" target="_blank" rel="noopener">
+    <span class="hole" aria-hidden="true"></span>
+    <span class="tag-kicker">Exhibit A</span>
+    <span class="tag-title">Merged into Microsoft PyRIT</span>
+    <span class="tag-id mono">microsoft/PyRIT #3028</span>
+    <span class="tag-body">A dataset loader for 1,000 ATT&amp;CK-tagged prompts from Meta’s CyberSecEval, with 48 tests.</span>
+    <PrStatus pr="microsoft/PyRIT#3028" states={prs} fallback="merged" />
+  </a>
+</header>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.5rem;
+    padding-top: clamp(3rem, 10vw, 7rem);
+    align-items: end;
+  }
+  @media (min-width: 72rem) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr) 17rem;
+    }
+  }
+
+  .role {
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 100;
+    font-size: var(--t-sm);
+    color: var(--muted);
+    margin-bottom: 1.25rem;
+  }
+
+  .name {
+    font-size: var(--t-3xl);
+    font-variation-settings: 'wdth' 125;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 0.92;
+    margin-bottom: 1.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 0.25em;
+  }
+
+  .intro {
+    font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+    line-height: 1.45;
+    max-width: 34rem;
+    color: var(--ink);
+    margin-bottom: 1.25rem;
+  }
+  .intro .line {
+    display: inline;
+  }
+
+  .seeking {
+    color: var(--muted);
+    max-width: 34rem;
+  }
+
+  .links {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.25rem;
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 100;
+    font-size: var(--t-sm);
+    font-weight: 550;
+  }
+  .links li {
+    margin: 0;
+  }
+
+  /* Redaction bars: an ink background on each inline fragment that shrinks
+     away to the right. box-decoration-break: clone gives every wrapped line
+     its own bar, so it works at any width. */
+  .redact {
+    background: linear-gradient(var(--ink), var(--ink)) no-repeat right center / 100% 82%;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    animation: declassify 520ms cubic-bezier(0.7, 0, 0.2, 1) var(--d) both;
+  }
+  @keyframes declassify {
+    to {
+      background-size: 0% 82%;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .redact {
+      animation: none;
+      background: none;
+    }
+  }
+
+  /* Exhibit tag: an evidence tag with clipped corners and a punched hole. */
+  .exhibit-tag {
+    position: relative;
+    display: grid;
+    gap: 0.35rem;
+    justify-items: start;
+    padding: 1.6rem 1.25rem 1.25rem 2.6rem;
+    background: var(--tag);
+    color: var(--tag-ink);
+    text-decoration: none;
+    clip-path: polygon(1.4rem 0, 100% 0, 100% 100%, 1.4rem 100%, 0 calc(100% - 1.4rem), 0 1.4rem);
+    transform: rotate(-2deg);
+    transition: transform 200ms ease;
+    max-width: 22rem;
+  }
+  .exhibit-tag:hover {
+    transform: rotate(0deg) translateY(-2px);
+  }
+  .exhibit-tag:focus-visible {
+    outline-color: var(--ink);
+  }
+  .hole {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    width: 0.7rem;
+    height: 0.7rem;
+    margin-top: -0.35rem;
+    border-radius: 50%;
+    background: var(--paper);
+    box-shadow: inset 0 0 0 2px rgb(0 0 0 / 0.2);
+  }
+  .tag-kicker {
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 112;
+    font-size: var(--t-xs);
+    font-weight: 700;
+  }
+  .tag-title {
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 112;
+    font-size: var(--t-lg);
+    font-weight: 750;
+    line-height: 1.1;
+  }
+  .tag-id {
+    font-size: var(--t-xs);
+  }
+  .tag-body {
+    font-size: var(--t-sm);
+    line-height: 1.45;
+    margin-bottom: 0.4rem;
+  }
+  .exhibit-tag :global(.pr-status) {
+    color: var(--tag-ink);
+  }
+</style>
