@@ -1,0 +1,103 @@
+---
+/**
+ * Countries visited. The map is projected at build time with d3-geo, so the
+ * page ships plain SVG paths and no mapping library.
+ */
+import { geoEqualEarth, geoPath } from 'd3-geo';
+import { feature } from 'topojson-client';
+import world from 'world-atlas/countries-110m.json';
+import { countries } from '../data/profile';
+
+const visited = new Map(countries.map((c) => [c.code, c]));
+const geo = feature(world as any, (world as any).objects.countries) as any;
+const features = geo.features.filter((f: any) => f.id !== '010'); // drop Antarctica
+const width = 960;
+const height = 440;
+const projection = geoEqualEarth().fitSize([width, height], { type: 'FeatureCollection', features } as any);
+const path = geoPath(projection).digits(1);
+const shapes = features.map((f: any) => ({
+  id: String(f.id),
+  name: f.properties?.name as string,
+  d: path(f) ?? '',
+  visited: visited.has(String(f.id)),
+}));
+---
+
+<section class="section" id="places" aria-labelledby="places-title">
+  <div class="section-head">
+    <h2 id="places-title">Places</h2>
+    <p>Countries I have lived in, studied in or visited.</p>
+  </div>
+
+  <figure class="map">
+    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby="map-desc">
+      <desc id="map-desc">World map with {countries.length} countries highlighted: {countries.map((c) => c.name).join(', ')}.</desc>
+      {
+        shapes.map((s: { d: string; name: string; visited: boolean }) => (
+          <path d={s.d} class={s.visited ? 'visited' : undefined}>
+            {s.visited && <title>{s.name}</title>}
+          </path>
+        ))
+      }
+    </svg>
+    <figcaption>
+      <ul class="legend">
+        {
+          countries.map((c) => (
+            <li>
+              <span class="swatch" aria-hidden="true" />
+              {c.name}
+              {c.note && <span class="note">{c.note}</span>}
+            </li>
+          ))
+        }
+      </ul>
+    </figcaption>
+  </figure>
+</section>
+
+<style>
+  .map {
+    margin: 0;
+  }
+  svg {
+    width: 100%;
+    height: auto;
+  }
+  path {
+    fill: var(--land);
+    stroke: var(--paper);
+    stroke-width: 0.5;
+  }
+  path.visited {
+    fill: var(--land-visited);
+  }
+  .legend {
+    list-style: none;
+    padding: 0;
+    margin: 1.25rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.75rem;
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 100;
+    font-size: var(--t-sm);
+    font-weight: 600;
+  }
+  .legend li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    margin: 0;
+  }
+  .swatch {
+    width: 0.7rem;
+    height: 0.7rem;
+    background: var(--land-visited);
+    align-self: center;
+  }
+  .note {
+    font-weight: 400;
+    color: var(--muted);
+  }
+</style>

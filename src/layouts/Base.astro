@@ -1,0 +1,69 @@
+---
+import '../styles/global.css';
+import { person } from '../data/profile';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const {
+  title = `${person.name}: AI security and security operations`,
+  description = `${person.name} is an AI security intern at RakFort in Dublin and an MSc Cyber Security graduate, contributing to Microsoft PyRIT, secfoo and SigmaHQ.`,
+} = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? person.siteUrl).href;
+const ogImage = new URL('og.png', Astro.site ?? person.siteUrl).href;
+const base = import.meta.env.BASE_URL;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: person.name,
+  jobTitle: 'AI Security Intern',
+  worksFor: { '@type': 'Organization', name: 'RakFort' },
+  address: { '@type': 'PostalAddress', addressLocality: 'Dublin', addressCountry: 'IE' },
+  email: `mailto:${person.email}`,
+  url: person.siteUrl,
+  alumniOf: [
+    { '@type': 'CollegeOrUniversity', name: 'National College of Ireland' },
+    { '@type': 'CollegeOrUniversity', name: 'MIT World Peace University' },
+  ],
+  sameAs: person.links.map((l) => l.href),
+};
+---
+
+<!doctype html>
+<html lang="en-IE">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="author" content={person.name} />
+    <meta name="theme-color" content="#eef1f3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#11171e" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
+
+    <meta property="og:type" content="profile" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:creator" content="@itsVarunPujary" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+    <!-- Apply the saved theme before first paint to avoid a flash. -->
+    <script is:inline>
+      try {
+        const t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <slot />
+  </body>
+</html>

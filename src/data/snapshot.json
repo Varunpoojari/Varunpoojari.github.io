@@ -1,0 +1,43 @@
+{
+  "takenAt": "2026-10-17T07:40:00Z",
+  "repos": {
+    "memhalflife": { "name": "memhalflife", "stars": 0, "forks": 0, "language": "Python", "pushedAt": "2026-10-15T08:14:17Z", "topics": [] },
+    "Security-log-analyzer": { "name": "Security-log-analyzer", "stars": 0, "forks": 0, "language": "Python", "pushedAt": "2026-10-14T18:25:40Z", "topics": [] },
+    "Adaptive_AI_Honeypot_System": { "name": "Adaptive_AI_Honeypot_System", "stars": 6, "forks": 1, "language": "Python", "pushedAt": "2026-09-27T11:25:11Z", "topics": ["cybersecurity", "deception", "honeypot", "intrusion-detection", "machine-learning", "python", "threat-intelligence"] },
+    "Malware-classification-system": { "name": "Malware-classification-system", "stars": 0, "forks": 0, "language": "Python", "pushedAt": "2026-10-05T12:36:31Z", "topics": [] },
+    "Network-Intrusion-Detection-System-using-Machine-Learning": { "name": "Network-Intrusion-Detection-System-using-Machine-Learning", "stars": 0, "forks": 1, "language": "Python", "pushedAt": "2026-10-01T00:41:30Z", "topics": [] },
+    "AI-powered-phishing-detector": { "name": "AI-powered-phishing-detector", "stars": 0, "forks": 0, "language": "Python", "pushedAt": "2026-09-29T17:11:59Z", "topics": [] },
+    "Malware_Analysis_Lab": { "name": "Malware_Analysis_Lab", "stars": 0, "forks": 0, "language": "Python", "pushedAt": "2026-09-28T11:06:57Z", "topics": ["cybersecurity", "malware-analysis", "python", "static-analysis", "threat-detection", "yara"] },
+    "pentest-suite": { "name": "pentest-suite", "stars": 0, "forks": 0, "language": "TypeScript", "pushedAt": "2026-09-28T11:04:27Z", "topics": ["cybersecurity", "llm", "nextjs", "owasp", "penetration-testing", "typescript", "vulnerability-scanner"] }
+  },
+  "prs": {
+    "secfoo-com/secfoo#30": { "key": "secfoo-com/secfoo#30", "state": "merged", "updatedAt": "2026-10-15T21:18:18Z" },
+    "microsoft/PyRIT#3028": { "key": "microsoft/PyRIT#3028", "state": "merged", "updatedAt": "2026-10-12T06:11:42Z" },
+    "secfoo-com/secfoo#26": { "key": "secfoo-com/secfoo#26", "state": "merged", "updatedAt": "2026-10-03T09:44:27Z" },
+    "SigmaHQ/sigma#6362": { "key": "SigmaHQ/sigma#6362", "state": "open", "updatedAt": "2026-10-01T03:30:33Z" },
+    "secfoo-com/secfoo#21": { "key": "secfoo-com/secfoo#21", "state": "merged", "updatedAt": "2026-10-01T19:57:20Z" },
+    "paralax/awesome-honeypots#172": { "key": "paralax/awesome-honeypots#172", "state": "open", "updatedAt": "2026-09-28T10:43:53Z" },
+    "secfoo-com/secfoo#12": { "key": "secfoo-com/secfoo#12", "state": "merged", "updatedAt": "2026-09-21T16:55:10Z" },
+    "secfoo-com/secfoo#7": { "key": "secfoo-com/secfoo#7", "state": "merged", "updatedAt": "2026-09-16T20:21:29Z" }
+  },
+  "articles": [
+    {
+      "title": "I mapped secfoo's prompt review to the OWASP LLM Top 10",
+      "url": "https://dev.to/varun_poojari/i-mapped-secfoos-prompt-review-to-the-owasp-llm-top-10-2hgo",
+      "publishedAt": "2026-10-07T13:02:25Z",
+      "readingTime": 5,
+      "tags": ["security", "ai", "llm", "opensource"],
+      "description": "A lot of LLM app risk sits somewhere duller than the model: in a system prompt glued to user input.",
+      "reactions": 0
+    },
+    {
+      "title": "What does an AI security review actually cost? I measured it per run",
+      "url": "https://dev.to/varun_poojari/what-does-an-ai-security-review-actually-cost-i-measured-it-per-run-4f2n",
+      "publishedAt": "2026-10-03T11:37:16Z",
+      "readingTime": 5,
+      "tags": ["security", "ai", "opensource", "devsecops"],
+      "description": "Everyone asks whether AI agents can find security bugs. Fewer ask what each review costs a team.",
+      "reactions": 6
+    }
+  ]
+}
