@@ -56,7 +56,19 @@ const introLines = [
 
   <a class="exhibit-tag" href="https://github.com/microsoft/PyRIT/pull/3028" target="_blank" rel="noopener">
     <span class="hole" aria-hidden="true"></span>
-    <span class="tag-kicker">Exhibit A</span>
+    <span class="tag-kicker">
+      Exhibit A
+      <img
+        class="org-logo"
+        src="https://github.com/microsoft.png?size=64"
+        alt="Microsoft"
+        width="22"
+        height="22"
+        loading="lazy"
+        decoding="async"
+        onerror="this.remove()"
+      />
+    </span>
     <span class="tag-title">Merged into Microsoft PyRIT</span>
     <span class="tag-id mono">microsoft/PyRIT #3028</span>
     <span class="tag-body">A dataset loader for 1,000 ATT&amp;CK-tagged prompts from Meta’s CyberSecEval, with 48 tests.</span>
@@ -184,10 +196,24 @@ const introLines = [
     box-shadow: inset 0 0 0 2px rgb(0 0 0 / 0.2);
   }
   .tag-kicker {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
     font-family: var(--display);
     font-variation-settings: 'wdth' 112;
     font-size: var(--t-xs);
     font-weight: 700;
+  }
+  /* Microsoft's own GitHub organisation avatar, loaded from GitHub. */
+  .org-logo {
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 3px;
+    background: #fff;
+    padding: 2px;
+    flex: none;
   }
   .tag-title {
     font-family: var(--display);
