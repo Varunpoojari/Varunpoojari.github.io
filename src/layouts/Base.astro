@@ -7,7 +7,7 @@ interface Props {
   description?: string;
 }
 const {
-  title = `${person.name}: AI security and security operations`,
+  title = person.name,
   description = `${person.name} is an AI security intern at RakFort in Dublin and an MSc Cyber Security graduate, contributing to Microsoft PyRIT, secfoo and SigmaHQ.`,
 } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? person.siteUrl).href;
