@@ -8,7 +8,7 @@ interface Props {
 }
 const {
   title = person.name,
-  description = `${person.name} is an AI security intern at RakFort in Dublin and an MSc Cyber Security graduate, contributing to Microsoft PyRIT, secfoo and SigmaHQ.`,
+  description = `${person.name} is an AI security engineer at RakFort in Dublin and an MSc Cyber Security graduate, contributing to Microsoft PyRIT, secfoo and SigmaHQ.`,
 } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? person.siteUrl).href;
 const ogImage = new URL('og.png', Astro.site ?? person.siteUrl).href;
@@ -18,7 +18,7 @@ const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Person',
   name: person.name,
-  jobTitle: 'AI Security Intern',
+  jobTitle: 'AI Security Engineer',
   worksFor: { '@type': 'Organization', name: 'RakFort' },
   address: { '@type': 'PostalAddress', addressLocality: 'Dublin', addressCountry: 'IE' },
   email: `mailto:${person.email}`,

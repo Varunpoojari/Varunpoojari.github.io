@@ -8,8 +8,8 @@
 
 export const person = {
   name: 'Varun Poojari',
-  // CV, GitHub README and Dev.to say "Intern"; LinkedIn headline says "Engineer".
-  role: 'AI Security Intern at RakFort',
+  // Site wording matches the LinkedIn headline ("Engineer").
+  role: 'AI Security Engineer at RakFort',
   location: 'Dublin, Ireland',
   email: 'varunrpoojari@gmail.com', // used on CV, GitHub and LinkedIn summary
   intro:
@@ -60,7 +60,7 @@ export type Era = {
 export const eras: Era[] = [
   {
     id: 'rakfort',
-    title: 'AI Security Intern',
+    title: 'AI Security Engineer',
     org: 'RakFort',
     period: 'Sep 2026 – present',
     place: 'Dublin',
@@ -191,7 +191,7 @@ export const eras: Era[] = [
   },
   {
     id: 'aether',
-    title: 'Cyber Security Intern',
+    title: 'Cyber Security',
     org: 'Aether Shield Technologies',
     period: 'Jun 2024 – Jan 2025', // LinkedIn; CV said Jul
     place: 'Pune',

@@ -1,6 +1,6 @@
 # varunpoojari.github.io
 
-Personal site of **Varun Poojari**: AI security intern at RakFort, Dublin, and MSc Cyber Security graduate.
+Personal site of **Varun Poojari**: AI security engineer at RakFort, Dublin, and MSc Cyber Security graduate.
 Live at **https://varunpoojari.github.io**.
 
 The design idea is a *case file*. Each role is a lettered exhibit with a line drawing of its city. The hero's redaction bars clear on a half-life schedule (a nod to MemHalfLife). The skills section is laid out like an ATT&CK matrix, where every skill points to the evidence behind it.
@@ -71,7 +71,7 @@ Almost everything lives in **`src/data/profile.ts`**:
 - **New pull request:** add to `contributions`.
 - **New skill:** add it to a column in `matrix`, with `evidence` saying where you used it.
 - **New certification or country:** add to `certifications` or `countries`. Countries use ISO 3166 numeric codes, e.g. `'250'` for France.
-- **Job title:** `person.role`. Your CV says "Intern" and LinkedIn says "Engineer"; the site uses the CV wording.
+- **Job title:** `person.role`. The site uses the LinkedIn wording ("Engineer").
 - **City drawing for a new place:** add a `city` value and draw it in `Skyline.astro`. Each drawing is a handful of SVG paths on a 600×90 canvas.
 
 Colours and type live in `src/styles/global.css` (`:root` for light, the two dark blocks for dark). The accent `--tag` is used only for tags, focus rings and selected states. Keep it that way.
