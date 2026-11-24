@@ -32,6 +32,7 @@ import { person } from '../data/profile';
     Built with Astro, hosted on GitHub Pages. Project and article data refresh from GitHub and Dev.to.{' '}
     <a href="https://github.com/Varunpoojari/Varunpoojari.github.io" target="_blank" rel="noopener">View the source</a>.
   </p>
+  <p class="ctf-hint">Three flags are hidden on this site. Found one? Press <kbd>Ctrl K</kbd> and type <code>submit</code>.</p>
 </footer>
 
 <script>
@@ -108,6 +109,19 @@ import { person } from '../data/profile';
   .handle {
     font-size: var(--t-sm);
     color: var(--muted);
+  }
+  .ctf-hint {
+    margin-top: 0.4rem;
+    font-size: var(--t-xs);
+    color: var(--muted);
+  }
+  .ctf-hint kbd,
+  .ctf-hint code {
+    font-family: var(--mono);
+    font-size: 0.95em;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 0 0.3rem;
   }
   .footer {
     margin-top: 5rem;

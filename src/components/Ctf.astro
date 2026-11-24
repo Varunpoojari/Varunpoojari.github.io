@@ -1,0 +1,48 @@
+---
+/**
+ * Capture-the-flag plumbing that is not the terminal: the console greeting
+ * (which carries flag 2), the page-source comment (flag 1) and the badge that
+ * appears in the hero once all three are submitted.
+ */
+import { flags } from '../data/ctf';
+import { person } from '../data/profile';
+
+const consoleFlag = Buffer.from(flags[1].flag).toString('base64');
+const sourceNote = `<!--
+  Evidence 1 of 3, recovered from the page source:
+  ${flags[0].flag}
+  Submit it on the page: Ctrl K, then type "submit" and the flag.
+-->`;
+---
+
+<Fragment set:html={sourceNote} />
+
+<script define:vars={{ consoleFlag, email: person.email, total: flags.length }}>
+  (() => {
+    const mark = [
+      ' __      __ ____  ',
+      ' \\ \\    / /|  _ \\ ',
+      '  \\ \\  / / | |_) |',
+      '   \\ \\/ /  |  __/ ',
+      '    \\  /   | |    ',
+      '     \\/    |_|    ',
+    ].join('\n');
+    const ink = 'font-family:ui-monospace,Menlo,monospace;';
+    console.log(`%c${mark}`, `${ink}color:#f2c230;font-weight:700;line-height:1.1`);
+    console.log('%cVarun Poojari · AI security, detection and forensics', `${ink}font-weight:700`);
+    console.log(`%cHiring? ${email}`, ink);
+    console.log(`%cEvidence 2 of ${total}, logged for anyone who opened the tools:\n${atob(consoleFlag)}`, `${ink}background:#0d1318;color:#c9f2d6;padding:6px 10px;border-radius:3px`);
+    console.log('%cSubmit flags in search: Ctrl K, then "submit flag{…}". Type "hint" there if you are stuck.', `${ink}color:#8f9ca8`);
+  })();
+
+  // Badge in the hero once every flag is in.
+  const sync = () => {
+    let solved = [];
+    try {
+      solved = JSON.parse(localStorage.getItem('ctf') || '[]');
+    } catch {}
+    document.querySelectorAll('[data-ctf-badge]').forEach((b) => (b.hidden = solved.length < total));
+  };
+  sync();
+  window.addEventListener('ctf:update', sync);
+</script>

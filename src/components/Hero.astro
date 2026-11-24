@@ -46,6 +46,7 @@ const introLines = [
       <span class="live-dot" aria-hidden="true"></span>
       <span>Available for roles</span>
       <span class="wide"><span class="sep" aria-hidden="true">·</span> Dublin</span>
+      <span class="ctf-badge" data-ctf-badge hidden title="All three flags found">CTF 3/3</span>
       <span class="clock" data-clock hidden><span class="sep" aria-hidden="true">·</span> <time data-clock-time></time> local</span>
     </p>
     <p class="role">{person.role}, Dublin</p>
@@ -230,6 +231,15 @@ const introLines = [
   }
   .sep {
     color: var(--muted);
+  }
+  .ctf-badge {
+    order: 9;
+    margin-left: 0.25rem;
+    padding: 0 0.4rem;
+    background: var(--tag);
+    color: var(--tag-ink);
+    font-weight: 700;
+    border-radius: 2px;
   }
   @media (max-width: 30rem) {
     .status .wide {

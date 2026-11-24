@@ -13,6 +13,7 @@ import Places from '../components/Places.astro';
 import Contact from '../components/Contact.astro';
 import Palette from '../components/Palette.astro';
 import Live from '../components/Live.astro';
+import Ctf from '../components/Ctf.astro';
 import { getRepos, getPrStates, getArticles } from '../lib/live';
 
 const [repos, prs, articles] = await Promise.all([getRepos(), getPrStates(), getArticles()]);
@@ -34,6 +35,7 @@ const [repos, prs, articles] = await Promise.all([getRepos(), getPrStates(), get
   </main>
   <Palette />
   <Live />
+  <Ctf />
 </Base>
 
 <style>

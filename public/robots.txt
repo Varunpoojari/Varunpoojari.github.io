@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+# Nothing in the evidence locker is for crawlers.
+Disallow: /evidence-locker/
 
 Sitemap: https://varunpoojari.github.io/sitemap-index.xml

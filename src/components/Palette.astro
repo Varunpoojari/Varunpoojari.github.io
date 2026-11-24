@@ -5,6 +5,11 @@
  * <dialog>, with a combobox and listbox for screen readers.
  */
 import { eras, projects, person, githubUser, contributions } from '../data/profile';
+import { flags } from '../data/ctf';
+import { createHash } from 'node:crypto';
+
+// Only hashes of the flags reach the browser.
+const ctf = flags.map((f) => ({ hash: createHash('sha256').update(f.flag).digest('hex'), where: f.where, hint: f.hint }));
 
 type Item = { label: string; hint: string; href?: string; action?: string; external?: boolean; keys?: string };
 const items: Item[] = [
@@ -36,6 +41,9 @@ const term: Record<string, string> = {
     '  history         case history',
     '  cat contact     how to reach me',
     '  pwd             where I am',
+    '  submit <flag>   hand in a captured flag',
+    '  flags           your CTF progress',
+    '  hint            a nudge for the next flag',
     '  clear           back to search',
   ].join('\n'),
   whoami: `${person.name.toLowerCase().replace(' ', '')}\n${person.role}, ${person.location}\nuid=1000 groups=blue-team,red-team,open-source`,
@@ -85,6 +93,7 @@ term['cat contact.txt'] = term['cat contact'];
   <pre class="term" hidden data-term aria-live="polite"></pre>
   <p class="empty" hidden data-palette-empty>No matches. Try “PyRIT”, “Dublin”, “email”, or type <code>help</code>.</p>
   <script type="application/json" data-term-data set:html={JSON.stringify(term)} />
+  <script type="application/json" data-ctf-data set:html={JSON.stringify(ctf)} />
 </dialog>
 
 <script>
@@ -108,9 +117,70 @@ term['cat contact.txt'] = term['cat contact'];
   };
   const termOut = dlg.querySelector<HTMLPreElement>('[data-term]')!;
   const termData: Record<string, string> = JSON.parse(dlg.querySelector('[data-term-data]')?.textContent || '{}');
+  // Capture the flag: progress lives in this browser only.
+  const ctf: { hash: string; where: string; hint: string }[] = JSON.parse(dlg.querySelector('[data-ctf-data]')?.textContent || '[]');
+  let memory: number[] = [];
+  const solved = (): number[] => {
+    try {
+      return JSON.parse(localStorage.getItem('ctf') || '[]');
+    } catch {
+      return memory;
+    }
+  };
+  const save = (list: number[]) => {
+    memory = list;
+    try {
+      localStorage.setItem('ctf', JSON.stringify(list));
+    } catch {}
+    window.dispatchEvent(new Event('ctf:update'));
+  };
+  const progress = () => {
+    const s = solved();
+    const rows = ctf.map((f, i) => `  [${s.includes(i) ? 'x' : ' '}] flag ${i + 1}  ${s.includes(i) ? f.where : '??????'}`);
+    return [`captured ${s.length}/${ctf.length}`, ...rows].join('\n');
+  };
+  const sha256 = async (text: string) => {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+  };
+  const trophy = [
+    '  ___________',
+    " '._==_==_=_.'",
+    ' .-\\:      /-.',
+    '| (|:.     |) |',
+    " '-|:.     |-'",
+    '   \\::.    /',
+    "    '::. .'",
+    '      ) (',
+    "    _.' '._",
+    "   '-------'",
+  ].join('\n');
+  const submit = async (value: string) => {
+    if (!/^flag\{.+\}$/i.test(value)) return 'usage: submit flag{...}';
+    if (!crypto?.subtle) return 'this browser cannot check flags (needs a secure context).';
+    const h = await sha256(value.trim());
+    const i = ctf.findIndex((f) => f.hash === h);
+    if (i < 0) return 'access denied: that flag does not match any evidence.';
+    const s = solved();
+    if (s.includes(i)) return `flag ${i + 1} (${ctf[i].where}) is already logged.\n\n${progress()}`;
+    const next = [...s, i].sort();
+    save(next);
+    if (next.length === ctf.length) {
+      return `${trophy}\n\nall ${ctf.length} flags captured. case closed.\nyou have earned the CTF badge, and a reason to email ${dlg.dataset.email}.`;
+    }
+    return `accepted: flag ${i + 1}, found in the ${ctf[i].where}.\n\n${progress()}`;
+  };
+
   const shell = (raw: string) => {
     const cmd = raw.trim().replace(/^\$\s*/, '').replace(/\s+/g, ' ').toLowerCase();
     if (!cmd) return null;
+    if (cmd === 'flags' || cmd === 'ctf') return progress();
+    if (cmd === 'hint') {
+      const s = solved();
+      const next = ctf.findIndex((_, i) => !s.includes(i));
+      return next < 0 ? 'nothing left to find. case closed.' : `hint for flag ${next + 1}: ${ctf[next].hint}`;
+    }
+    if (/^submit\b/.test(cmd)) return 'press Enter to submit.';
     if (termData[cmd]) return termData[cmd];
     if (/^sudo\b/.test(cmd)) return 'varun is not in the sudoers file. This incident will be reported.';
     if (/^(rm -rf|:\(\)|mkfs|dd if=)/.test(cmd)) return 'nice try. this box is read-only.';
@@ -173,6 +243,14 @@ term['cat contact.txt'] = term['cat contact'];
         return;
       }
       if (cmd === 'exit' || cmd === 'logout') return dlg.close();
+      if (/^submit\b/.test(cmd)) {
+        const raw = input.value.trim().replace(/^\$\s*/, '');
+        const value = raw.replace(/^submit\s*/i, '').trim();
+        termOut.hidden = false;
+        termOut.textContent = `$ ${raw}\nchecking…`;
+        submit(value).then((out) => (termOut.textContent = `$ ${raw}\n${out}`));
+        return;
+      }
       if (!termOut.hidden) return;
       const o = shown()[active];
       if (o) run(o);
