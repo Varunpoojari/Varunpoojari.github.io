@@ -93,7 +93,7 @@ const introLines = [
         height="22"
         loading="lazy"
         decoding="async"
-        onerror="this.remove()"
+        data-drop-on-error
       />
     </span>
     <span class="tag-title">Merged into Microsoft PyRIT</span>
@@ -105,6 +105,13 @@ const introLines = [
 </header>
 
 <script>
+  // Drop the org logo if GitHub can't serve it (no inline onerror handler,
+  // so the Content Security Policy can forbid inline event handlers).
+  document.querySelectorAll<HTMLImageElement>('img[data-drop-on-error]').forEach((img) => {
+    if (img.complete && img.naturalWidth === 0) img.remove();
+    else img.addEventListener('error', () => img.remove(), { once: true });
+  });
+
   // Live Dublin clock in the status line.
   const clock = document.querySelector<HTMLElement>('[data-clock]');
   const time = document.querySelector<HTMLElement>('[data-clock-time]');

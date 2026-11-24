@@ -48,14 +48,14 @@ import { matrix } from '../data/profile';
   const panel = document.querySelector<HTMLElement>('[data-evidence-panel]');
   if (root && panel) {
     const cells = [...root.querySelectorAll<HTMLButtonElement>('.cell')];
-    const empty = panel.innerHTML;
+    const empty = [...panel.childNodes].map((n) => n.cloneNode(true));
     root.addEventListener('click', (e) => {
       const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.cell');
       if (!btn) return;
       const wasOn = btn.getAttribute('aria-pressed') === 'true';
       cells.forEach((c) => c.setAttribute('aria-pressed', 'false'));
       if (wasOn) {
-        panel.innerHTML = empty;
+        panel.replaceChildren(...empty.map((n) => n.cloneNode(true)));
         return;
       }
       btn.setAttribute('aria-pressed', 'true');

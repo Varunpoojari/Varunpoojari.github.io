@@ -97,8 +97,8 @@ term['cat contact.txt'] = term['cat contact'];
   </ul>
   <pre class="term" hidden data-term aria-live="polite"></pre>
   <p class="empty" hidden data-palette-empty>No matches. Try “PyRIT”, “Dublin”, “email”, or type <code>help</code>.</p>
-  <script type="application/json" data-term-data set:html={JSON.stringify(term)} />
-  <script type="application/json" data-ctf-data set:html={JSON.stringify(ctf)} />
+  <script type="application/json" data-term-data set:html={JSON.stringify(term).replace(/</g, '\\u003c')} />
+  <script type="application/json" data-ctf-data set:html={JSON.stringify(ctf).replace(/</g, '\\u003c')} />
 </dialog>
 
 <script>

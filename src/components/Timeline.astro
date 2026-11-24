@@ -155,14 +155,16 @@ const count = (e: (typeof eras)[number]) => (e.points?.length ?? 0) + (e.entries
       return [r.left + r.width / 2 - box.left, r.top + r.height / 2 - box.top];
     });
     strings.setAttribute('viewBox', `0 0 ${box.width} ${box.height}`);
-    strings.innerHTML = pins
-      .slice(1)
-      .map(([x, y], i) => {
+    const ns = 'http://www.w3.org/2000/svg';
+    strings.replaceChildren(
+      ...pins.slice(1).map(([x, y], i) => {
         const [px, py] = pins[i];
         const sag = Math.min(40, Math.hypot(x - px, y - py) * 0.12);
-        return `<path d="M${px} ${py} Q${(px + x) / 2} ${(py + y) / 2 + sag} ${x} ${y}" />`;
-      })
-      .join('');
+        const path = document.createElementNS(ns, 'path');
+        path.setAttribute('d', `M${px} ${py} Q${(px + x) / 2} ${(py + y) / 2 + sag} ${x} ${y}`);
+        return path;
+      }),
+    );
   };
   const setView = (view: string) => {
     if (!board || !listView) return;

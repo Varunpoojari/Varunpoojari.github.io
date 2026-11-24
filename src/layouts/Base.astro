@@ -52,7 +52,7 @@ const jsonLd = {
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:creator" content="@itsVarunPujary" />
 
-    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c')} />
 
     <!-- Apply the saved theme before first paint to avoid a flash. -->
     <script is:inline>
