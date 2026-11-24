@@ -8,9 +8,10 @@
  * the bounding box of the country's largest landmass, so the contiguous US is
  * not stretched to cover Alaska, and `slice` keeps the flag's proportions.
  */
-import { geoEqualEarth, geoPath, geoCentroid } from 'd3-geo';
+import { geoEqualEarth, geoMercator, geoPath, geoCentroid, geoBounds } from 'd3-geo';
 import { feature } from 'topojson-client';
 import world from 'world-atlas/countries-110m.json';
+import world50 from 'world-atlas/countries-50m.json';
 import { countries } from '../data/profile';
 
 const visited = new Map(countries.map((c) => [c.code, c]));
@@ -50,10 +51,10 @@ const at = (lonlat: [number, number]) => projection(lonlat) as [number, number];
 const centre = (id: string) => (byId.has(id) ? at(geoCentroid(byId.get(id)) as [number, number]) : null);
 const home = at([73.8567, 18.5204]); // Pune
 const stops = [
-  { id: '784', label: '', p: centre('784') },
-  { id: '826', label: '', p: centre('826') },
-  { id: '840', label: 'College Station', p: at([-96.3344, 30.628]) }, // Texas A&M
-  { id: '372', label: 'Current station', p: at([-6.2603, 53.3498]), current: true }, // Dublin
+  { id: '784', p: centre('784') },
+  { id: '826', p: centre('826') },
+  { id: '840', p: at([-96.3344, 30.628]) }, // Texas A&M
+  { id: '372', p: at([-6.2603, 53.3498]), current: true }, // Dublin
 ].filter((s) => s.p && visited.has(s.id));
 const arc = ([x0, y0]: [number, number], [x1, y1]: [number, number]) => {
   const lift = Math.min(140, Math.hypot(x1 - x0, y1 - y0) * 0.32);
@@ -74,6 +75,42 @@ const vb = (() => {
   const y0 = Math.max(0, Math.min(arcTop, ...b.map((r: any) => r[0][1])) - padY);
   const y1 = Math.min(height, Math.max(...b.map((r: any) => r[1][1])) + padY);
   return `${x0.toFixed(0)} ${y0.toFixed(0)} ${(x1 - x0).toFixed(0)} ${(y1 - y0).toFixed(0)}`;
+})();
+
+// UK and Ireland are a few pixels wide on a world map, so they get a zoomed
+// inset beside it, drawn from the more detailed 50m outlines. A dashed box on
+// the main map marks the area the inset shows.
+const INSET = ['826', '372'].filter((id) => visited.has(id));
+const geo50 = (feature(world50 as any, (world50 as any).objects.countries) as any).features;
+const focus = geo50.filter((f: any) => INSET.includes(String(f.id)));
+const iw = 200;
+const ih = 230;
+const ip = 16;
+const insetProj = geoMercator().fitExtent([[ip, ip], [iw - ip, ih - ip]], { type: 'FeatureCollection', features: focus } as any);
+const insetPath = geoPath(insetProj).digits(1);
+const [[lon0, lat0], [lon1, lat1]] = [insetProj.invert!([0, ih])!, insetProj.invert!([iw, 0])!];
+const near = geo50.filter((f: any) => {
+  const [[a, b], [c, d]] = geoBounds(f);
+  return c >= lon0 && a <= lon1 && d >= lat0 && b <= lat1;
+});
+function insetBox(f: any) {
+  const g = f.geometry;
+  const polys = g.type === 'MultiPolygon' ? g.coordinates.map((c: any) => ({ type: 'Polygon', coordinates: c })) : [g];
+  const largest = polys.reduce((x: any, y: any) => (insetPath.area(y) > insetPath.area(x) ? y : x));
+  const [[x0, y0], [x1, y1]] = insetPath.bounds(largest);
+  return { x: x0, y: y0, w: Math.max(x1 - x0, 1), h: Math.max(y1 - y0, 1) };
+}
+const insetShapes = near.map((f: any) => {
+  const id = String(f.id);
+  return { id, name: visited.get(id)?.name ?? f.properties?.name, d: insetPath(f) ?? '', visited: INSET.includes(id), box: INSET.includes(id) ? insetBox(f) : null };
+});
+const dublinInset = insetProj([-6.2603, 53.3498]) as [number, number];
+const zoomBox = (() => {
+  const b = features.filter((f: any) => INSET.includes(String(f.id))).map((f: any) => path.bounds(f));
+  if (!b.length) return null;
+  const x0 = Math.min(...b.map((r: any) => r[0][0])) - 4, y0 = Math.min(...b.map((r: any) => r[0][1])) - 4;
+  const x1 = Math.max(...b.map((r: any) => r[1][0])) + 4, y1 = Math.max(...b.map((r: any) => r[1][1])) + 4;
+  return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
 })();
 
 // Flags drawn at their official aspect ratios. Colours are each flag's
@@ -133,7 +170,8 @@ const flags: Record<string, { vb: string; svg: string; fit?: 'none' }> = {
   </div>
 
   <figure class="map" data-map>
-    <svg viewBox={vb} role="group" aria-labelledby="map-desc">
+    <div class="map-row">
+    <svg class="world" viewBox={vb} role="group" aria-labelledby="map-desc">
       <desc id="map-desc">World map with {countries.length} countries highlighted: {countries.map((c) => c.name).join(', ')}.</desc>
       <defs>
         {
@@ -167,25 +205,70 @@ const flags: Record<string, { vb: string; svg: string; fit?: 'none' }> = {
         }
       </g>
 
+      {zoomBox && <rect class="zoom-box" x={zoomBox.x.toFixed(1)} y={zoomBox.y.toFixed(1)} width={zoomBox.w.toFixed(1)} height={zoomBox.h.toFixed(1)} rx="2" aria-hidden="true" />}
+
       <g class="flights" aria-hidden="true">
         {flights.map((f) => <path class="route" d={f.d} pathLength="1" style={`--d:${f.delay}ms`} />)}
         <circle class="home-dot" cx={home[0].toFixed(1)} cy={home[1].toFixed(1)} r="4" />
-        <text class="city-label" x={(home[0] + 8).toFixed(1)} y={(home[1] + 14).toFixed(1)}>Home · Pune</text>
         {
           flights.map((f) => (
             <g class:list={['stop', { current: f.current }]} style={`--d:${f.delay + 900}ms`}>
               {f.current && <circle class="pulse" cx={(f.p as number[])[0].toFixed(1)} cy={(f.p as number[])[1].toFixed(1)} r="5" />}
               <circle class="stop-dot" cx={(f.p as number[])[0].toFixed(1)} cy={(f.p as number[])[1].toFixed(1)} r={f.current ? 4.5 : 3} />
-              {f.label && (
-                <text class="city-label" x={((f.p as number[])[0] + (f.current ? -10 : 8)).toFixed(1)} y={((f.p as number[])[1] + (f.current ? -10 : 14)).toFixed(1)} text-anchor={f.current ? 'end' : 'start'}>
-                  {f.label}
-                </text>
-              )}
             </g>
           ))
         }
       </g>
     </svg>
+    {
+      INSET.length > 0 && (
+        <svg class="inset" viewBox={`0 0 ${iw} ${ih}`} role="group" aria-label="Zoomed view of the United Kingdom and Ireland">
+          <defs>
+            <clipPath id="inset-clip">
+              <rect width={iw} height={ih} />
+            </clipPath>
+            {insetShapes
+              .filter((s: any) => s.visited)
+              .map((s: any) => (
+                <pattern
+                  id={`iflag-${s.id}`}
+                  patternUnits="userSpaceOnUse"
+                  x={s.box.x.toFixed(1)}
+                  y={s.box.y.toFixed(1)}
+                  width={s.box.w.toFixed(1)}
+                  height={s.box.h.toFixed(1)}
+                  viewBox={flags[s.id]?.vb}
+                  preserveAspectRatio={flags[s.id]?.fit === 'none' ? 'none' : 'xMidYMid slice'}
+                  set:html={(flags[s.id]?.svg ?? '').replace('id="uk-clip"', 'id="uk-clip-i"').replace('url(#uk-clip)', 'url(#uk-clip-i)')}
+                />
+              ))}
+          </defs>
+          <rect class="inset-sea" width={iw} height={ih} />
+          <g clip-path="url(#inset-clip)">
+            <g class="land" aria-hidden="true">
+              {insetShapes.map((s: any) => <path d={s.d} class={s.visited ? 'visited' : undefined} />)}
+            </g>
+            <g class="flags">
+              {insetShapes
+                .filter((s: any) => s.visited)
+                .map((s: any) => (
+                  <path d={s.d} class="flag" fill={`url(#iflag-${s.id})`} data-country={s.id} tabindex="0" role="img" aria-label={`${s.name}: show flag`}>
+                    <title>{s.name}</title>
+                  </path>
+                ))}
+            </g>
+            {visited.has('372') && (
+              <g class="flights" aria-hidden="true">
+                <circle class="pulse" cx={dublinInset[0].toFixed(1)} cy={dublinInset[1].toFixed(1)} r="5" />
+                <circle class="stop-dot" cx={dublinInset[0].toFixed(1)} cy={dublinInset[1].toFixed(1)} r="4" />
+              </g>
+            )}
+          </g>
+          <rect class="inset-frame" x="1" y="1" width={iw - 2} height={ih - 2} rx="3" />
+        </svg>
+      )
+    }
+    </div>
     <figcaption>
       <ul class="legend">
         {
@@ -238,10 +321,45 @@ const flags: Record<string, { vb: string; svg: string; fit?: 'none' }> = {
 <style>
   .map {
     margin: 0;
-    max-width: 52rem;
   }
-  .map > svg {
+  .map-row {
+    display: grid;
+    gap: 1rem;
+    align-items: center;
+  }
+  @media (min-width: 46rem) {
+    .map-row {
+      grid-template-columns: minmax(0, 1fr) 11.5rem;
+    }
+  }
+  .map-row > svg {
     overflow: hidden;
+  }
+  .inset {
+    width: 100%;
+    max-width: 10rem;
+    justify-self: center;
+  }
+  @media (min-width: 46rem) {
+    .inset {
+      max-width: 13rem;
+    }
+  }
+  .inset-sea {
+    fill: var(--paper-raised);
+  }
+  .inset-frame,
+  .zoom-box {
+    fill: none;
+    stroke: var(--ink-soft);
+    stroke-width: 1.2;
+    stroke-dasharray: 4 3;
+  }
+  .inset .land path {
+    stroke-width: 0.8;
+  }
+  .inset .flights {
+    opacity: 1;
   }
   svg {
     width: 100%;
@@ -292,25 +410,8 @@ const flags: Record<string, { vb: string; svg: string; fit?: 'none' }> = {
     from { transform: scale(1); opacity: 0.9; }
     to { transform: scale(4); opacity: 0; }
   }
-  .city-label {
-    font-family: var(--display);
-    font-size: 13px;
-    font-weight: 700;
-    fill: var(--ink);
-    paint-order: stroke;
-    stroke: var(--paper);
-    stroke-width: 3.5px;
-    stroke-linejoin: round;
-  }
-  .stop.current .city-label {
-    fill: #b3261e;
-  }
-  /* The map scales down on phones; keep routes and labels readable. */
+  /* The map scales down on phones; keep routes readable. */
   @media (max-width: 40rem) {
-    .city-label {
-      font-size: 26px;
-      stroke-width: 6px;
-    }
     .route {
       stroke-width: 2.6;
     }
