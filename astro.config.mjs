@@ -8,6 +8,7 @@ import sitemap from '@astrojs/sitemap';
 // `base: '/portfolio'` — every asset path uses import.meta.env.BASE_URL.
 export default defineConfig({
   site: 'https://varunpoojari.github.io',
-  integrations: [sitemap()],
+  // The CTF's evidence locker stays out of the sitemap, as robots.txt asks.
+  integrations: [sitemap({ filter: (page) => !page.includes('/evidence-locker') })],
   build: { inlineStylesheets: 'auto' },
 });

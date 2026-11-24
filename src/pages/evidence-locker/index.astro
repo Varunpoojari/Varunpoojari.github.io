@@ -1,4 +1,10 @@
-<!doctype html>
+---
+/** Evidence 3 of 3: the page robots.txt asks crawlers to skip. Not in the sitemap. */
+import { flags } from '../../data/ctf';
+const flag = flags[2].flag;
+---
+
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -13,7 +19,7 @@
       <span class="tag">EVIDENCE 3 OF 3</span>
       <h1>You walked straight past the robots.txt sign.</h1>
       <p>A <code class="inline-code">Disallow</code> line is a polite request to crawlers, not access control. Anything it lists is still one request away.</p>
-      <code>flag{r0b0ts_txt_is_n0t_access_c0ntr0l}</code>
+      <code>{flag}</code>
       <p>Submit it on the main page: press <strong>Ctrl K</strong> (or <strong>/</strong>) and type <strong>submit</strong> followed by the flag.</p>
       <p><a href="/">Back to the case file</a></p>
     </main>
