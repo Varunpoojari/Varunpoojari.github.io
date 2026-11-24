@@ -35,9 +35,32 @@ const fmt = new Intl.DateTimeFormat('en-IE', { day: 'numeric', month: 'short', y
     }
   </ol>
   <p class="more">
+    <button type="button" class="show-older" data-show-older aria-expanded="false" hidden>Show older articles</button>
     <a href={`https://dev.to/${devtoUser}`} target="_blank" rel="noopener">All articles on Dev.to</a>
   </p>
 </section>
+
+<script>
+  // Four articles show by default; the rest sit behind a toggle. Live.astro may
+  // add new ones after load, so the button re-checks whenever the list changes.
+  const list = document.querySelector<HTMLElement>('#writing [data-articles]');
+  const btn = document.querySelector<HTMLButtonElement>('[data-show-older]');
+  if (list && btn) {
+    const sync = () => {
+      const extra = list.children.length - 4;
+      btn.hidden = extra <= 0;
+      const open = list.classList.contains('show-all');
+      btn.textContent = open ? 'Show fewer' : `Show ${extra} older article${extra === 1 ? '' : 's'}`;
+      btn.setAttribute('aria-expanded', String(open));
+    };
+    btn.addEventListener('click', () => {
+      list.classList.toggle('show-all');
+      sync();
+    });
+    new MutationObserver(sync).observe(list, { childList: true });
+    sync();
+  }
+</script>
 
 <style is:global>
   /*
@@ -51,7 +74,7 @@ const fmt = new Intl.DateTimeFormat('en-IE', { day: 'numeric', month: 'short', y
     margin: 0;
     max-width: 62rem;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16.5rem), 1fr));
     gap: 1rem;
     counter-reset: file;
   }
@@ -59,6 +82,9 @@ const fmt = new Intl.DateTimeFormat('en-IE', { day: 'numeric', month: 'short', y
     margin: 0;
     counter-increment: file;
     display: flex;
+  }
+  #writing .articles:not(.show-all) li:nth-child(n + 5) {
+    display: none;
   }
   #writing .article {
     position: relative;
@@ -152,7 +178,24 @@ const fmt = new Intl.DateTimeFormat('en-IE', { day: 'numeric', month: 'short', y
       max-width: 44rem;
     }
   }
+  #writing .show-older {
+    font: inherit;
+    font-weight: 600;
+    color: var(--ink);
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+  }
+  #writing .show-older:hover {
+    border-color: var(--ink-soft);
+  }
   #writing .more {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.25rem;
     margin-top: 1.25rem;
     font-family: var(--display);
     font-variation-settings: 'wdth' 100;

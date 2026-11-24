@@ -63,11 +63,14 @@ const areaName = { ai: 'AI security', forensics: 'Forensics', detection: 'Detect
               )}
             </p>
           </div>
-          <ul class="how">
-            {p.how.map((h) => (
-              <li>{h}</li>
-            ))}
-          </ul>
+          <details class="how-wrap">
+            <summary>How it works</summary>
+            <ul class="how">
+              {p.how.map((h) => (
+                <li>{h}</li>
+              ))}
+            </ul>
+          </details>
         </li>
       ))
     }
@@ -93,22 +96,69 @@ const areaName = { ai: 'AI security', forensics: 'Forensics', detection: 'Detect
 </section>
 
 <style>
+  /* Featured projects as case-file cards, two across; detail folds away. */
   .featured {
     list-style: none;
     padding: 0;
     margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+    gap: 1rem;
   }
   .project {
-    display: grid;
-    gap: 1rem 2.5rem;
-    padding: 2rem 0;
-    border-top: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1.25rem 1.25rem 1rem;
     margin: 0;
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--ink);
+    border-radius: var(--radius);
   }
-  @media (min-width: 58rem) {
-    .project {
-      grid-template-columns: 17rem minmax(0, 1fr);
-    }
+  .project-meta {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  .project-links {
+    margin-top: auto !important;
+    padding-top: 0.25rem;
+  }
+  .how-wrap {
+    margin-top: 0.75rem;
+    border-top: 1px solid var(--rule-soft);
+    padding-top: 0.6rem;
+  }
+  .how-wrap summary {
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 100;
+    font-size: var(--t-sm);
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .how-wrap summary::-webkit-details-marker {
+    display: none;
+  }
+  .how-wrap summary::before {
+    content: '+';
+    font-weight: 800;
+    width: 1ch;
+  }
+  .how-wrap[open] summary::before {
+    content: '\2212';
+  }
+  .how-wrap summary:hover {
+    color: var(--ink);
+  }
+  .how-wrap .how {
+    margin-top: 0.6rem;
+    font-size: var(--t-sm);
   }
   .area {
     font-family: var(--display);
@@ -119,7 +169,7 @@ const areaName = { ai: 'AI security', forensics: 'Forensics', detection: 'Detect
     margin-bottom: 0.35rem;
   }
   .project h3 {
-    font-size: var(--t-xl);
+    font-size: var(--t-lg);
     font-variation-settings: 'wdth' 112;
     letter-spacing: -0.01em;
     margin-bottom: 0.5rem;

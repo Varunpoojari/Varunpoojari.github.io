@@ -152,8 +152,12 @@ const introLines = [
     animation: declassify 520ms cubic-bezier(0.7, 0, 0.2, 1) var(--d) both;
   }
   @keyframes declassify {
+    99% {
+      background-size: 0% 82%;
+    }
     to {
       background-size: 0% 82%;
+      background-image: none;
     }
   }
   @media (prefers-reduced-motion: reduce) {

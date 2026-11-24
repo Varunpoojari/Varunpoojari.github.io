@@ -14,7 +14,7 @@ export const person = {
   email: 'varunrpoojari@gmail.com', // used on CV, GitHub and LinkedIn summary
   intro:
     'I work where security operations meets AI security. By day I test LLM applications for prompt injection, data leakage and unsafe agent integrations. In the evenings I contribute detection content and red-teaming tooling to open source, most recently a dataset loader merged into Microsoft PyRIT.',
-  seeking: 'Graduate, SOC analyst and detection engineering roles in Ireland and the EU.',
+  seeking: 'AI security, SOC analyst and detection engineering roles in Ireland and the EU.',
   workRights: 'Stamp 1G: full right to work in Ireland until November 2028.',
   siteUrl: 'https://varunpoojari.github.io',
   links: [

@@ -12,6 +12,7 @@ import { matrix } from '../data/profile';
     <p>Arranged like an ATT&amp;CK matrix. Select a skill to see where it was used.</p>
   </div>
 
+  <div class="matrix-wrap">
   <div class="matrix" data-matrix>
     {
       matrix.map((t) => (
@@ -31,6 +32,7 @@ import { matrix } from '../data/profile';
         </div>
       ))
     }
+  </div>
   </div>
 
   <div class="evidence" aria-live="polite" data-evidence-panel>
@@ -71,6 +73,9 @@ import { matrix } from '../data/profile';
 </script>
 
 <style>
+  .matrix-wrap {
+    container-type: inline-size;
+  }
   .matrix {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
@@ -78,12 +83,23 @@ import { matrix } from '../data/profile';
     border-top: 1px solid var(--rule);
     border-left: 1px solid var(--rule);
   }
-  @media (min-width: 84rem) {
+  /* Seven tactics, one row, as soon as the column is wide enough. */
+  @container (min-width: 50rem) {
     .matrix {
       grid-template-columns: repeat(7, minmax(0, 1fr));
     }
     .cell {
       font-size: var(--t-xs);
+      padding: 0.4rem 0.45rem;
+    }
+    .tactic h3 {
+      padding: 0.65rem 0.55rem;
+    }
+  }
+  /* Mid widths: four columns so the seven split 4 + 3 rather than 6 + 1. */
+  @container (min-width: 36rem) and (max-width: 49.99rem) {
+    .matrix {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
   }
   .tactic {
