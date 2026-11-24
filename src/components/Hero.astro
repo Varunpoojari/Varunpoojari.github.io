@@ -16,6 +16,20 @@ const { prs } = Astro.props;
 
 // Half-life schedule: delays shrink geometrically, so the reveal accelerates.
 const halfLife = (i: number) => Math.round(900 * (1 - Math.pow(0.5, i)) + 120);
+// Fingerprint watermark: a whorl of broken elliptical ridges, generated so it
+// is original line work. Deterministic, so every build draws the same print.
+const ridges = Array.from({ length: 22 }, (_, i) => {
+  const rx = 14 + i * 9.5;
+  const ry = 20 + i * 12;
+  const tilt = -8 + i * 0.6;
+  const gap = ((i * 37) % 60) + 20; // degrees left open in each ridge
+  const start = ((i * 83) % 360) * (Math.PI / 180);
+  const sweep = (360 - gap) * (Math.PI / 180);
+  const pt = (a: number) => [260 + rx * Math.cos(a), 300 + ry * Math.sin(a)].map((n) => n.toFixed(1)).join(' ');
+  return { d: `M${pt(start)} A${rx} ${ry} 0 ${sweep > Math.PI ? 1 : 0} 1 ${pt(start + sweep)}`, tilt };
+});
+
+const nameLetters = (w: string) => [...w];
 const introLines = [
   'I test LLM applications for prompt injection, data leakage',
   'and unsafe agent integrations, and contribute detection',
@@ -24,11 +38,23 @@ const introLines = [
 ---
 
 <header class="hero" id="top">
+  <svg class="print" viewBox="0 0 520 600" aria-hidden="true">
+    {ridges.map((r) => <path d={r.d} transform={`rotate(${r.tilt} 260 300)`} />)}
+  </svg>
   <div class="hero-text">
+    <p class="status" aria-label="Available for roles, based in Dublin">
+      <span class="live-dot" aria-hidden="true"></span>
+      <span>Available for roles</span>
+      <span class="wide"><span class="sep" aria-hidden="true">·</span> Dublin</span>
+      <span class="clock" data-clock hidden><span class="sep" aria-hidden="true">·</span> <time data-clock-time></time> local</span>
+    </p>
     <p class="role">{person.role}, Dublin</p>
-    <h1 class="name">
-      <span class="redact" style={`--d:${halfLife(0)}ms`}>Varun</span>
-      <span class="redact" style={`--d:${halfLife(1)}ms`}>Poojari</span>
+    <h1 class="name" aria-label={person.name} data-name>
+      {person.name.split(' ').map((w, wi) => (
+        <span class="redact word" style={`--d:${halfLife(wi)}ms`} aria-hidden="true">
+          {nameLetters(w).map((ch) => <span class="ch">{ch}</span>)}
+        </span>
+      ))}
     </h1>
     <p class="intro">
       {
@@ -77,8 +103,78 @@ const introLines = [
   </a>
 </header>
 
+<script>
+  // Live Dublin clock in the status line.
+  const clock = document.querySelector<HTMLElement>('[data-clock]');
+  const time = document.querySelector<HTMLElement>('[data-clock-time]');
+  if (clock && time) {
+    const fmt = new Intl.DateTimeFormat('en-IE', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Dublin' });
+    const tick = () => {
+      const now = new Date();
+      time.textContent = fmt.format(now);
+      time.setAttribute('datetime', now.toISOString());
+    };
+    tick();
+    clock.hidden = false;
+    setInterval(tick, 15000);
+  }
+
+  // The name answers the cursor: letters near the pointer condense and gain
+  // weight, then ease back. Rest positions are measured once (and on resize)
+  // so the changing widths never feed back into the effect.
+  const name = document.querySelector<HTMLElement>('[data-name]');
+  const fine = matchMedia('(pointer: fine)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (name && fine) {
+    const hero = name.closest<HTMLElement>('.hero')!;
+    const letters = [...name.querySelectorAll<HTMLElement>('.ch')];
+    let rest: { x: number; y: number }[] = [];
+    // Letters only ever get narrower, so a line can't overflow. The one risk
+    // is the reverse: a narrower name fitting on fewer lines. So the resting
+    // line break is locked in before the effect starts.
+    const words = [...name.querySelectorAll<HTMLElement>('.word')];
+    const measure = () => {
+      letters.forEach((l) => (l.style.fontVariationSettings = ''));
+      name.classList.remove('stacked');
+      const tops = words.map((w) => Math.round(w.getBoundingClientRect().top));
+      name.classList.toggle('stacked', new Set(tops).size > 1);
+      rest = letters.map((l) => {
+        const r = l.getBoundingClientRect();
+        return { x: r.left + r.width / 2 + scrollX, y: r.top + r.height / 2 + scrollY };
+      });
+    };
+    let frame = 0;
+    let px = 0;
+    let py = 0;
+    const R = 190;
+    const paint = () => {
+      frame = 0;
+      letters.forEach((l, i) => {
+        const d = Math.hypot(px - rest[i].x, py - rest[i].y);
+        const k = Math.max(0, 1 - d / R);
+        const e = k * k * (3 - 2 * k); // smoothstep
+        l.style.fontVariationSettings = `'wdth' ${(125 - 50 * e).toFixed(1)}, 'wght' ${(800 + 100 * e).toFixed(0)}`;
+      });
+    };
+    // Measure after the redaction reveal has finished and fonts are in.
+    const ready = () => document.fonts.ready.then(measure);
+    setTimeout(ready, 1300);
+    addEventListener('resize', () => setTimeout(measure, 150));
+    hero.addEventListener('pointermove', (e) => {
+      if (!rest.length) return;
+      px = e.pageX;
+      py = e.pageY;
+      if (!frame) frame = requestAnimationFrame(paint);
+    });
+    hero.addEventListener('pointerleave', () => {
+      letters.forEach((l) => (l.style.fontVariationSettings = ''));
+    });
+  }
+</script>
+
 <style>
   .hero {
+    position: relative;
+    isolation: isolate;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 2.5rem;
@@ -97,6 +193,77 @@ const introLines = [
     font-size: var(--t-sm);
     color: var(--muted);
     margin-bottom: 1.25rem;
+  }
+
+  .status {
+    display: inline-flex;
+    white-space: nowrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0 0.9rem;
+    padding: 0.25rem 0.7rem 0.25rem 0.55rem;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    background: var(--paper-raised);
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    color: var(--ink-soft);
+  }
+  .live-dot {
+    position: relative;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--merged);
+  }
+  .live-dot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--merged);
+    animation: live 2s ease-out infinite;
+  }
+  @keyframes live {
+    from { transform: scale(1); opacity: 0.7; }
+    to { transform: scale(3); opacity: 0; }
+  }
+  .sep {
+    color: var(--muted);
+  }
+  @media (max-width: 30rem) {
+    .status .wide {
+      display: none;
+    }
+  }
+  .clock time {
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+
+  /* Fingerprint watermark behind the name. */
+  .print {
+    position: absolute;
+    z-index: -1;
+    top: clamp(-1rem, 2vw, 2rem);
+    left: clamp(-6rem, -4vw, -2rem);
+    width: clamp(16rem, 36vw, 30rem);
+    height: auto;
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 3.2;
+    stroke-linecap: round;
+    opacity: 0.045;
+    pointer-events: none;
+  }
+
+  .name.stacked {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .ch {
+    display: inline-block;
+    transition: font-variation-settings 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
   .name {
@@ -295,6 +462,9 @@ const introLines = [
     100% { translate: 0 0; }
   }
   @media (prefers-reduced-motion: reduce) {
+    .live-dot::after {
+      animation: none;
+    }
     .stamp,
     .exhibit-tag {
       animation: none;

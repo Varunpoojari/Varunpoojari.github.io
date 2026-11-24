@@ -89,6 +89,33 @@ html {
   scroll-padding-top: 1.5rem;
 }
 
+/* Paper grain: a tiled noise texture, a few percent strong, over the paper. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: var(--grain, 0.07);
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.3 0 0 0 0 0.3 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+:root[data-theme='dark'] body::before {
+  --grain: 0.18;
+  mix-blend-mode: soft-light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) body::before {
+    --grain: 0.18;
+    mix-blend-mode: soft-light;
+  }
+}
+@media print {
+  body::before {
+    display: none;
+  }
+}
+
 body {
   margin: 0;
   background: var(--paper);

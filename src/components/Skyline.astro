@@ -105,7 +105,44 @@ const labels = {
   }
 </svg>
 
+<script>
+  // Trace each skyline stroke by stroke the first time it scrolls into view.
+  // Without JS, or with reduced motion, the drawings simply appear.
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          e.target.classList.add('drawn');
+          io.unobserve(e.target);
+        }
+      },
+      { threshold: 0.4 },
+    );
+    document.querySelectorAll<SVGSVGElement>('.skyline').forEach((svg) => {
+      svg.querySelectorAll('path').forEach((p, i) => {
+        p.setAttribute('pathLength', '1');
+        (p as SVGPathElement).style.setProperty('--i', String(i));
+      });
+      svg.classList.add('sketch');
+      io.observe(svg);
+    });
+  }
+</script>
+
 <style>
+  .skyline.sketch :global(path) {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  .skyline.sketch.drawn :global(path) {
+    animation: sketch 900ms cubic-bezier(0.45, 0, 0.2, 1) calc(var(--i) * 70ms) forwards;
+  }
+  @keyframes sketch {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
   .skyline {
     width: 100%;
     max-width: 30rem;
