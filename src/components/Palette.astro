@@ -9,7 +9,10 @@ import { flags } from '../data/ctf';
 import { createHash } from 'node:crypto';
 
 // Only hashes of the flags reach the browser.
-const ctf = flags.map((f) => ({ hash: createHash('sha256').update(f.flag).digest('hex'), where: f.where, hint: f.hint }));
+// Flags are compared in a normalised form (lower case, no spaces, no flag{ }
+// wrapper) so a phone keyboard's capitals or a stray space don't fail a find.
+const norm = (s: string) => s.toLowerCase().replace(/\s+/g, '').replace(/^flag\{(.*)\}$/, '$1');
+const ctf = flags.map((f) => ({ hash: createHash('sha256').update(norm(f.flag)).digest('hex'), where: f.where, hint: f.hint }));
 
 type Item = { label: string; hint: string; href?: string; action?: string; external?: boolean; keys?: string };
 const items: Item[] = [
@@ -75,6 +78,8 @@ term['cat contact.txt'] = term['cat contact'];
       aria-autocomplete="list"
       placeholder="Jump to a section, project or profile, or type help"
       autocomplete="off"
+      autocapitalize="off"
+      autocorrect="off"
       spellcheck="false"
       data-palette-input
     />
@@ -155,12 +160,22 @@ term['cat contact.txt'] = term['cat contact'];
     "    _.' '._",
     "   '-------'",
   ].join('\n');
+  const normalise = (s: string) =>
+    s
+      .normalize('NFKC')
+      .toLowerCase()
+      .replace(/[\u201c\u201d\u2018\u2019"'`]/g, '')
+      .replace(/[\uff5b\u2774]/g, '{')
+      .replace(/[\uff5d\u2775]/g, '}')
+      .replace(/\s+/g, '')
+      .replace(/^flag\{(.*)\}$/, '$1');
   const submit = async (value: string) => {
-    if (!/^flag\{.+\}$/i.test(value)) return 'usage: submit flag{...}';
+    const v = normalise(value);
+    if (!v) return 'usage: submit flag{...}';
     if (!crypto?.subtle) return 'this browser cannot check flags (needs a secure context).';
-    const h = await sha256(value.trim());
+    const h = await sha256(v);
     const i = ctf.findIndex((f) => f.hash === h);
-    if (i < 0) return 'access denied: that flag does not match any evidence.';
+    if (i < 0) return "access denied: that flag does not match any evidence.\ncheck for zeros (0) in place of the letter o, and type 'hint' for a nudge.";
     const s = solved();
     if (s.includes(i)) return `flag ${i + 1} (${ctf[i].where}) is already logged.\n\n${progress()}`;
     const next = [...s, i].sort();
