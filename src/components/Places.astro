@@ -46,7 +46,7 @@ const visitedShapes = shapes.filter((s: any) => s.visited);
 // Flight paths: every trip leaves from home (Pune) and the log ends in Dublin,
 // the current station. Cities are used where the site names one; otherwise the
 // country's centroid.
-const byId = new Map(features.map((f: any) => [String(f.id), f]));
+const byId = new Map<string, any>(features.map((f: any) => [String(f.id), f]));
 const at = (lonlat: [number, number]) => projection(lonlat) as [number, number];
 const centre = (id: string) => (byId.has(id) ? at(geoCentroid(byId.get(id)) as [number, number]) : null);
 const home = at([73.8567, 18.5204]); // Pune

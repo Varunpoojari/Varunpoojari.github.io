@@ -20,7 +20,7 @@ type Line = { stamp: string; event: string; kind: string; text: string; href: st
 const lines: Line[] = [
   ...articles.slice(0, 4).map((a) => ({ stamp: iso(a.publishedAt), event: 'ARTICLE_PUBLISHED', kind: 'info', text: a.title, href: a.url })),
   ...contributions.map((c) => {
-    const state = prs[c.pr] ?? c.fallbackState;
+    const state: string = prs[c.pr]?.state ?? c.fallbackState;
     return { stamp: c.pr, event: level[state] ?? 'PR', kind: state, text: c.title, href: c.href };
   }),
 ];
