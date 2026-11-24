@@ -191,7 +191,7 @@ export const eras: Era[] = [
   },
   {
     id: 'aether',
-    title: 'Cyber Security',
+    title: 'Cyber Security Intern',
     org: 'Aether Shield Technologies',
     period: 'Jun 2024 – Jan 2025', // LinkedIn; CV said Jul
     place: 'Pune',
