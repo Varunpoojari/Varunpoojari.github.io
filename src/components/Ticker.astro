@@ -1,0 +1,143 @@
+---
+/**
+ * Activity feed under the hero, written like a log tail: merged pull
+ * requests and published articles, newest articles first. Built from the
+ * same GitHub and Dev.to data as the rest of the page, so the daily rebuild
+ * keeps it current. The strip scrolls; hover or focus pauses it.
+ */
+import { contributions } from '../data/profile';
+import type { Article, PrState } from '../lib/live';
+
+interface Props {
+  prs: Record<string, PrState>;
+  articles: Article[];
+}
+const { prs, articles } = Astro.props;
+const iso = (d: string) => new Date(d).toISOString().slice(0, 10);
+const level: Record<string, string> = { merged: 'PR_MERGED', open: 'PR_IN_REVIEW', closed: 'PR_CLOSED' };
+
+type Line = { stamp: string; event: string; kind: string; text: string; href: string };
+const lines: Line[] = [
+  ...articles.slice(0, 4).map((a) => ({ stamp: iso(a.publishedAt), event: 'ARTICLE_PUBLISHED', kind: 'info', text: a.title, href: a.url })),
+  ...contributions.map((c) => {
+    const state = prs[c.pr] ?? c.fallbackState;
+    return { stamp: c.pr, event: level[state] ?? 'PR', kind: state, text: c.title, href: c.href };
+  }),
+];
+---
+
+<aside class="ticker" aria-label="Recent activity">
+  <span class="ticker-label" aria-hidden="true"><span class="dot"></span><span class="long">tail -f activity.log</span><span class="short">log</span></span>
+  <div class="ticker-window">
+    <ul class="ticker-track">
+      {
+        [0, 1].map((copy) =>
+          lines.map((l) => (
+            <li aria-hidden={copy === 1 ? 'true' : undefined}>
+              <a href={l.href} target="_blank" rel="noopener" tabindex={copy === 1 ? -1 : undefined}>
+                <span class="ts">[{l.stamp}]</span> <span class:list={['ev', l.kind]}>{l.event}</span> <span class="msg">{l.text}</span>
+              </a>
+            </li>
+          )),
+        )
+      }
+    </ul>
+  </div>
+</aside>
+
+<style>
+  .ticker {
+    display: flex;
+    align-items: stretch;
+    margin-top: clamp(2.5rem, 6vw, 4rem);
+    border-block: 1px solid var(--rule);
+    background: var(--paper-raised);
+    font-family: var(--mono);
+    font-size: var(--t-xs);
+    overflow: hidden;
+  }
+  .ticker-label {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.85rem;
+    background: var(--ink);
+    color: var(--paper);
+    white-space: nowrap;
+  }
+  .short {
+    display: none;
+  }
+  @media (max-width: 40rem) {
+    .long {
+      display: none;
+    }
+    .short {
+      display: inline;
+    }
+  }
+  .dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--tag);
+    animation: blink 1.6s steps(2, start) infinite;
+  }
+  @keyframes blink {
+    to { visibility: hidden; }
+  }
+  .ticker-window {
+    flex: 1;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 2rem, #000 calc(100% - 3rem), transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 2rem, #000 calc(100% - 3rem), transparent);
+  }
+  .ticker-track {
+    display: flex;
+    width: max-content;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    animation: scroll 70s linear infinite;
+  }
+  .ticker:hover .ticker-track,
+  .ticker:focus-within .ticker-track {
+    animation-play-state: paused;
+  }
+  @keyframes scroll {
+    to { transform: translateX(-50%); }
+  }
+  .ticker-track li {
+    margin: 0;
+    white-space: nowrap;
+  }
+  .ticker-track a {
+    display: block;
+    padding: 0.55rem 1.75rem 0.55rem 1rem;
+    text-decoration: none;
+    color: var(--ink-soft);
+  }
+  .ticker-track a:hover .msg {
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-color: var(--tag);
+  }
+  .ts {
+    color: var(--muted);
+  }
+  .ev {
+    font-weight: 700;
+  }
+  .ev.merged { color: var(--merged); }
+  .ev.open { color: var(--open); }
+  .ev.info { color: var(--ink); }
+  @media (prefers-reduced-motion: reduce) {
+    .ticker-track {
+      animation: none;
+    }
+    .ticker-window {
+      overflow-x: auto;
+    }
+  }
+</style>

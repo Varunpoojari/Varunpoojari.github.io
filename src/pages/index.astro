@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Rail from '../components/Rail.astro';
 import Hero from '../components/Hero.astro';
+import Ticker from '../components/Ticker.astro';
 import Timeline from '../components/Timeline.astro';
 import Work from '../components/Work.astro';
 import Ledger from '../components/Ledger.astro';
@@ -21,6 +22,7 @@ const [repos, prs, articles] = await Promise.all([getRepos(), getPrStates(), get
   <Rail />
   <main id="main" class="page">
     <Hero prs={prs} />
+    <Ticker prs={prs} articles={articles} />
     <Timeline prs={prs} />
     <Work repos={repos} />
     <Ledger prs={prs} />

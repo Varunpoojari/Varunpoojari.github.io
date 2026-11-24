@@ -73,6 +73,7 @@ const introLines = [
     <span class="tag-id mono">microsoft/PyRIT #3028</span>
     <span class="tag-body">A dataset loader for 1,000 ATT&amp;CK-tagged prompts from Meta’s CyberSecEval, with 48 tests.</span>
     <PrStatus pr="microsoft/PyRIT#3028" states={prs} fallback="merged" />
+    <span class="stamp" aria-hidden="true"><span>Merged</span><span class="stamp-sub">Verified upstream</span></span>
   </a>
 </header>
 
@@ -236,5 +237,67 @@ const introLines = [
   }
   .exhibit-tag :global(.pr-status) {
     color: var(--tag-ink);
+  }
+
+  /* Rubber stamp: lands once, after the redaction bars have cleared. */
+  .stamp {
+    position: absolute;
+    right: 0.55rem;
+    bottom: 0.75rem;
+    display: grid;
+    justify-items: center;
+    padding: 0.3rem 0.6rem 0.25rem;
+    border: 3px double #b3261e;
+    border-radius: 4px;
+    color: #b3261e;
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 125;
+    font-weight: 800;
+    font-size: var(--t-sm);
+    letter-spacing: 0.12em;
+    line-height: 1;
+    text-transform: uppercase;
+    mix-blend-mode: multiply;
+    opacity: 0.82;
+    transform: rotate(-14deg);
+    pointer-events: none;
+    /* Uneven ink, like a real stamp. */
+    -webkit-mask-image: radial-gradient(circle at 30% 40%, #000 55%, rgb(0 0 0 / 0.55) 100%);
+    mask-image: radial-gradient(circle at 30% 40%, #000 55%, rgb(0 0 0 / 0.55) 100%);
+    animation: stamp 380ms cubic-bezier(0.2, 0.9, 0.3, 1.25) 1500ms both;
+  }
+  .stamp-sub {
+    font-size: 0.45rem;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    margin-top: 0.2rem;
+  }
+  @keyframes stamp {
+    from {
+      opacity: 0;
+      transform: rotate(-14deg) scale(2.6);
+    }
+    70% {
+      opacity: 0.9;
+      transform: rotate(-14deg) scale(0.94);
+    }
+    to {
+      opacity: 0.82;
+      transform: rotate(-14deg) scale(1);
+    }
+  }
+  .exhibit-tag {
+    animation: thud 260ms ease-out 1760ms both;
+  }
+  @keyframes thud {
+    0% { translate: 0 0; }
+    35% { translate: 0 3px; }
+    100% { translate: 0 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stamp,
+    .exhibit-tag {
+      animation: none;
+    }
   }
 </style>

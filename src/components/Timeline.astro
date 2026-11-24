@@ -25,7 +25,41 @@ const count = (e: (typeof eras)[number]) => (e.points?.length ?? 0) + (e.entries
     <p>Roles, study and the work that happened during each, most recent first.</p>
   </div>
 
-  <ol class="eras">
+  <div class="view-switch" role="group" aria-label="Case history view">
+    <button type="button" aria-pressed="true" data-view="list">File</button>
+    <button type="button" aria-pressed="false" data-view="board">Evidence board</button>
+  </div>
+
+  <div class="board" data-board hidden>
+    <svg class="strings" aria-hidden="true" data-strings></svg>
+    <ol class="board-cards">
+      {
+        eras.map((era, i) => (
+          <li class="card" style={`--tilt:${[-1.6, 1.2, -0.8, 1.8, -1.2, 0.9, -1.9][i % 7]}deg`} data-card>
+            <a href={`#${era.id}`} data-card-link>
+              <span class="pin" aria-hidden="true" data-pin></span>
+              <span class="card-top">
+                <span class="card-letter">{letter(i)}</span>
+                <span class="card-period">{era.period}</span>
+              </span>
+              <span class="card-title">{era.title}</span>
+              <span class="card-org">{era.org}, {era.place}</span>
+              {era.entries && (
+                <span class="card-notes">
+                  {era.entries.slice(0, 3).map((e) => (
+                    <span class="note">{e.title}</span>
+                  ))}
+                  {era.entries.length > 3 && <span class="note more-note">+{era.entries.length - 3} more</span>}
+                </span>
+              )}
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+
+  <ol class="eras" data-eras>
     {
       eras.map((era, i) => (
         <li class:list={["era", { folded: i >= OPEN }]} id={era.id} data-era>
@@ -106,6 +140,58 @@ const count = (e: (typeof eras)[number]) => (e.points?.length ?? 0) + (e.entries
     const d = el?.querySelector<HTMLDetailsElement>('[data-era-more]');
     if (d) d.open = true;
   };
+  // File / evidence-board switch. The board is a second view of the same eras;
+  // red string joins the cards in time order.
+  const section = document.getElementById('history');
+  const board = section?.querySelector<HTMLElement>('[data-board]');
+  const listView = section?.querySelector<HTMLElement>('[data-eras]');
+  const strings = section?.querySelector<SVGSVGElement>('[data-strings]');
+  const buttons = [...(section?.querySelectorAll<HTMLButtonElement>('[data-view]') ?? [])];
+  const drawStrings = () => {
+    if (!board || !strings || board.hidden) return;
+    const box = board.getBoundingClientRect();
+    const pins = [...board.querySelectorAll<HTMLElement>('[data-pin]')].map((p) => {
+      const r = p.getBoundingClientRect();
+      return [r.left + r.width / 2 - box.left, r.top + r.height / 2 - box.top];
+    });
+    strings.setAttribute('viewBox', `0 0 ${box.width} ${box.height}`);
+    strings.innerHTML = pins
+      .slice(1)
+      .map(([x, y], i) => {
+        const [px, py] = pins[i];
+        const sag = Math.min(40, Math.hypot(x - px, y - py) * 0.12);
+        return `<path d="M${px} ${py} Q${(px + x) / 2} ${(py + y) / 2 + sag} ${x} ${y}" />`;
+      })
+      .join('');
+  };
+  const setView = (view: string) => {
+    if (!board || !listView) return;
+    const isBoard = view === 'board';
+    board.hidden = !isBoard;
+    listView.hidden = isBoard;
+    buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
+    try {
+      localStorage.setItem('history-view', view);
+    } catch {}
+    drawStrings();
+  };
+  buttons.forEach((b) => b.addEventListener('click', () => setView(b.dataset.view || 'list')));
+  try {
+    if (localStorage.getItem('history-view') === 'board' && !location.hash) setView('board');
+  } catch {}
+  new ResizeObserver(drawStrings).observe(board ?? document.body);
+  // A card, or a rail link to an era, opens the file view at that era.
+  document.addEventListener(
+    'click',
+    (e) => {
+      const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="#"]');
+      const id = a?.getAttribute('href')?.slice(1);
+      if (id && board && !board.hidden && listView?.querySelector(`[id="${id}"]`)) setView('list');
+    },
+    true,
+  );
+  if (location.hash && board && !board.hidden) setView('list');
+
   openFor(location.hash);
   window.addEventListener('hashchange', () => openFor(location.hash));
   document.addEventListener('click', (e) => {
@@ -128,6 +214,166 @@ const count = (e: (typeof eras)[number]) => (e.points?.length ?? 0) + (e.entries
   .era:first-child {
     border-top: 0;
     padding-top: 0;
+  }
+
+  .view-switch {
+    display: inline-flex;
+    margin: -0.75rem 0 1.75rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .view-switch button {
+    font: inherit;
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 104;
+    font-size: var(--t-sm);
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--paper-raised);
+    border: 0;
+    padding: 0.4rem 0.9rem;
+    cursor: pointer;
+  }
+  .view-switch button + button {
+    border-left: 1px solid var(--rule);
+  }
+  .view-switch button[aria-pressed='true'] {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  /* Evidence board: cork, pinned index cards, red string. */
+  .board {
+    --cork: #c9a97c;
+    position: relative;
+    padding: clamp(1.25rem, 3vw, 2.25rem);
+    border-radius: 4px;
+    background-color: var(--cork);
+    background-image:
+      radial-gradient(rgb(90 60 25 / 0.28) 1px, transparent 1.4px),
+      radial-gradient(rgb(255 240 210 / 0.25) 1px, transparent 1.4px);
+    background-size: 7px 7px, 11px 11px;
+    background-position: 0 0, 3px 5px;
+    box-shadow: inset 0 0 0 10px rgb(70 45 20 / 0.55), inset 0 0 40px rgb(60 35 10 / 0.35);
+  }
+  :global(:root[data-theme='dark']) .board {
+    --cork: #6e5434;
+  }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .board {
+      --cork: #6e5434;
+    }
+  }
+  .strings {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .strings :global(path) {
+    fill: none;
+    stroke: #b3261e;
+    stroke-width: 2;
+    stroke-linecap: round;
+    filter: drop-shadow(0 2px 1px rgb(0 0 0 / 0.3));
+  }
+  .board-cards {
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem 0 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14.5rem), 1fr));
+    gap: 2rem 1.5rem;
+  }
+  .card {
+    position: relative;
+    z-index: 2;
+    margin: 0;
+    transform: rotate(var(--tilt));
+    transition: transform 160ms ease;
+  }
+  .card:hover {
+    transform: rotate(0deg) scale(1.03);
+    z-index: 3;
+  }
+  .card a {
+    position: relative;
+    display: grid;
+    gap: 0.3rem;
+    height: 100%;
+    padding: 1.35rem 1rem 1rem;
+    background: #fbfaf5;
+    background-image: repeating-linear-gradient(transparent 0 1.45rem, rgb(80 120 170 / 0.14) 1.45rem calc(1.45rem + 1px));
+    background-position: 0 2.6rem;
+    color: #1b2229;
+    text-decoration: none;
+    box-shadow: 0 8px 14px -6px rgb(0 0 0 / 0.45);
+  }
+  .pin {
+    position: absolute;
+    top: 0.45rem;
+    left: 50%;
+    width: 0.85rem;
+    height: 0.85rem;
+    margin-left: -0.425rem;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ffe27a, var(--tag) 45%, #a77d00);
+    box-shadow: 0 3px 3px rgb(0 0 0 / 0.4);
+    z-index: 4;
+  }
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-letter {
+    font-family: var(--display);
+    font-weight: 800;
+    font-variation-settings: 'wdth' 120;
+    background: var(--tag);
+    color: var(--tag-ink);
+    padding: 0 0.4rem;
+  }
+  .card-period {
+    font-family: var(--display);
+    font-size: var(--t-xs);
+    color: #5d6b77;
+  }
+  .card-title {
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 106;
+    font-weight: 700;
+    font-size: var(--t-md);
+    line-height: 1.2;
+    margin-top: 0.2rem;
+  }
+  .card-org {
+    font-style: italic;
+    font-size: var(--t-sm);
+    color: #3a4a57;
+  }
+  .card-notes {
+    display: grid;
+    gap: 0.15rem;
+    margin-top: 0.35rem;
+    font-family: 'Segoe Print', 'Bradley Hand', 'Comic Neue', cursive;
+    font-size: var(--t-xs);
+    color: #1f3f78;
+  }
+  .note::before {
+    content: '\2192  ';
+  }
+  .more-note {
+    color: #5d6b77;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card,
+    .card:hover {
+      transform: none;
+    }
   }
 
   .era.folded {
