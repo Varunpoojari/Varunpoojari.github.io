@@ -40,53 +40,129 @@ const fmt = new Intl.DateTimeFormat('en-IE', { day: 'numeric', month: 'short', y
 </section>
 
 <style is:global>
+  /*
+   * Case-file cards. Markup stays li > a.article > .title/.desc/.meta so the
+   * client-side refresh in Live.astro keeps working; the file number comes
+   * from a CSS counter, and the meta line is pulled to the top with `order`.
+   */
   #writing .articles {
     list-style: none;
     padding: 0;
     margin: 0;
-    max-width: 46rem;
-    border-top: 1px solid var(--rule);
+    max-width: 62rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    gap: 1rem;
+    counter-reset: file;
   }
   #writing .articles li {
     margin: 0;
-    border-bottom: 1px solid var(--rule-soft);
+    counter-increment: file;
+    display: flex;
   }
   #writing .article {
-    display: grid;
-    gap: 0.3rem;
-    padding: 1.25rem 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    width: 100%;
+    padding: 1.1rem 1.15rem 1rem;
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--ink);
+    border-radius: var(--radius);
     text-decoration: none;
+    transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+  }
+  /* Evidence-tag file number, top-left of each card. */
+  #writing .article::before {
+    content: 'No. ' counter(file, decimal-leading-zero);
+    align-self: flex-start;
+    background: var(--tag);
+    color: var(--tag-ink);
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 112;
+    font-size: var(--t-xs);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 0.1rem 0.45rem;
+    border-radius: 2px;
+  }
+  #writing .meta {
+    order: -1;
+    position: absolute;
+    top: 1.15rem;
+    right: 1.15rem;
+    font-family: var(--display);
+    font-variation-settings: 'wdth' 100;
+    font-size: var(--t-xs);
+    color: var(--muted);
+    text-align: right;
   }
   #writing .title {
     font-family: var(--display);
     font-variation-settings: 'wdth' 106;
-    font-size: var(--t-lg);
+    font-size: var(--t-md);
     font-weight: 650;
-    line-height: 1.2;
-    text-decoration: underline;
-    text-decoration-color: transparent;
-    text-decoration-thickness: 3px;
-    text-underline-offset: 0.15em;
-    transition: text-decoration-color 120ms ease;
-  }
-  #writing .article:hover .title {
-    text-decoration-color: var(--tag);
+    line-height: 1.25;
+    margin-top: 0.25rem;
+    text-wrap: balance;
   }
   #writing .desc {
     color: var(--ink-soft);
+    font-size: var(--t-sm);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
   }
-  #writing .meta {
+  #writing .article::after {
+    content: 'Read on Dev.to \2192';
+    margin-top: auto;
+    padding-top: 0.5rem;
     font-family: var(--display);
     font-variation-settings: 'wdth' 100;
-    font-size: var(--t-sm);
+    font-size: var(--t-xs);
+    font-weight: 600;
     color: var(--muted);
+    transition: color 140ms ease;
+  }
+  #writing .article:hover,
+  #writing .article:focus-visible {
+    transform: translateY(-2px);
+    border-color: var(--ink);
+    box-shadow: 0 4px 0 var(--tag);
+  }
+  #writing .article:hover::after {
+    color: var(--ink);
+  }
+  /* Newest piece gets the full row on wide screens. */
+  @media (min-width: 52rem) {
+    #writing .articles li:first-child {
+      grid-column: 1 / -1;
+    }
+    #writing .articles li:first-child .title {
+      font-size: var(--t-lg);
+    }
+    #writing .articles li:first-child .desc {
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      max-width: 44rem;
+    }
   }
   #writing .more {
-    margin-top: 1rem;
+    margin-top: 1.25rem;
     font-family: var(--display);
     font-variation-settings: 'wdth' 100;
     font-size: var(--t-sm);
     font-weight: 550;
   }
-
+  @media (prefers-reduced-motion: reduce) {
+    #writing .article:hover,
+    #writing .article:focus-visible {
+      transform: none;
+    }
+  }
 </style>
