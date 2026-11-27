@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-27T10:30:14.727304Z",
+  "title": "Design System: Varun Poojari — Case File",
+  "extensions": {
+    "colorMeta": {
+      "evidence-tag": {
+        "role": "primary",
+        "displayName": "Evidence-Tag Yellow"
+      },
+      "lab-paper": {
+        "role": "neutral",
+        "displayName": "Lab Paper"
+      },
+      "case-ink": {
+        "role": "neutral",
+        "displayName": "Case Ink"
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "link-underline",
+        "value": "120ms ease",
+        "purpose": "Link underline colour on hover."
+      }
+    ],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Evidence Tag",
+      "kind": "chip",
+      "refersTo": "evidence-tag-chip",
+      "description": "Marks a tag or selected state.",
+      "html": "<span class=\"ds-tag\">T1548.006</span>",
+      "css": ".ds-tag{background:var(--tag,#f2c230);color:var(--tag-ink,#1b1607);border-radius:3px;padding:.15em .5em;font-family:'JetBrains Mono Variable',ui-monospace,monospace;font-size:.8125rem}"
+    },
+    {
+      "name": "Text Link",
+      "kind": "custom",
+      "description": "Inline link with quiet underline.",
+      "html": "<a class=\"ds-link\" href=\"#\">Pull request #3028</a>",
+      "css": ".ds-link{color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.2em;text-decoration-color:var(--rule,#c6cfd6);transition:text-decoration-color 120ms ease}.ds-link:hover{text-decoration-color:var(--ink,#142029)}.ds-link:focus-visible{outline:3px solid var(--tag,#f2c230);outline-offset:2px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Case File",
+    "rules": [
+      {
+        "name": "The One Tag Rule",
+        "body": "Evidence-Tag Yellow marks; it never decorates.",
+        "section": "colors"
+      },
+      {
+        "name": "The Real Identifier Rule",
+        "body": "Monospace appears only on things that are literally identifiers.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Bench Rule",
+        "body": "Nothing floats. Use a tonal step or a rule line before reaching for a shadow.",
+        "section": "elevation"
+      }
+    ]
+  }
+}

@@ -188,6 +188,9 @@ const introLines = [
     gap: 2.5rem;
     padding-top: clamp(3rem, 10vw, 7rem);
     align-items: end;
+    /* The stamp lands from 2.6x scale; keep that from widening the page on phones. */
+    overflow-x: clip;
+    overflow-clip-margin: 1.5rem;
   }
   @media (min-width: 72rem) {
     .hero {
@@ -431,9 +434,9 @@ const introLines = [
     display: grid;
     justify-items: center;
     padding: 0.3rem 0.6rem 0.25rem;
-    border: 3px double #b3261e;
+    border: 3px double #6e150f;
     border-radius: 4px;
-    color: #b3261e;
+    color: #6e150f;
     font-family: var(--display);
     font-variation-settings: 'wdth' 125;
     font-weight: 800;
@@ -448,11 +451,11 @@ const introLines = [
     /* Uneven ink, like a real stamp. */
     -webkit-mask-image: radial-gradient(circle at 30% 40%, #000 55%, rgb(0 0 0 / 0.55) 100%);
     mask-image: radial-gradient(circle at 30% 40%, #000 55%, rgb(0 0 0 / 0.55) 100%);
-    animation: stamp 380ms cubic-bezier(0.2, 0.9, 0.3, 1.25) 1500ms both;
+    animation: stamp 420ms cubic-bezier(0.16, 1, 0.3, 1) 1500ms both;
   }
   .stamp-sub {
-    font-size: 0.45rem;
-    letter-spacing: 0.18em;
+    font-size: 0.5625rem;
+    letter-spacing: 0.14em;
     font-weight: 700;
     margin-top: 0.2rem;
   }
