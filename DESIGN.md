@@ -90,7 +90,7 @@ Cool, quiet neutrals with a single high-visibility evidence-tag yellow.
 - **Rule Line** (#c6cfd6) and **Rule Line Soft** (#dce2e7): dividers, link underlines at rest.
 
 ### Status
-- **Merged Green** (#2f6f4f / dark #6cc296) and **Open Amber** (#8a5a00 / dark #e9b649): live PR status, and as the ramp for the GitHub contribution tiles in Open source (level 0 is Rule Line Soft; levels 1–4 mix Merged Green into the raised paper).
+- **Merged Green** (#2f6f4f / dark #6cc296) and **Open Amber** (#8a5a00 / dark #e9b649): live PR status only.
 
 ### Named Rules
 **The One Tag Rule.** Evidence-Tag Yellow marks; it never decorates. No yellow headings, backgrounds or buttons beyond tags, focus and selection.

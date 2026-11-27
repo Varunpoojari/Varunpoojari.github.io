@@ -4,14 +4,12 @@
  */
 import { contributions } from '../data/profile';
 import PrStatus from './PrStatus.astro';
-import ContribGraph from './ContribGraph.astro';
-import type { PrState, ContributionDay } from '../lib/live';
+import type { PrState } from '../lib/live';
 
 interface Props {
   prs: Record<string, PrState>;
-  days: ContributionDay[];
 }
-const { prs, days } = Astro.props;
+const { prs } = Astro.props;
 const merged = contributions.filter((c) => (prs[c.pr]?.state ?? c.fallbackState) === 'merged').length;
 const repos = new Set(contributions.map((c) => c.repo)).size;
 ---
@@ -23,8 +21,6 @@ const repos = new Set(contributions.map((c) => c.repo)).size;
       <span data-merged-count>{merged}</span> of {contributions.length} pull requests merged across {repos} upstream projects. Status is checked live against GitHub.
     </p>
   </div>
-
-  <ContribGraph days={days} />
 
   <table class="ledger">
     <caption class="visually-hidden">Pull requests to other projects</caption>
