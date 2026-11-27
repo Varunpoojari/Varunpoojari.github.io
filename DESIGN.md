@@ -2,8 +2,8 @@
 name: Varun Poojari — Case File
 description: A security practitioner's portfolio presented as an evidence file.
 colors:
-  lab-paper: "#eef1f3"
-  lab-paper-raised: "#f8f9fa"
+  lab-paper: "#ffffff"
+  lab-paper-raised: "#f6f8fa"
   case-ink: "#142029"
   case-ink-soft: "#3a4a57"
   muted-graphite: "#5d6b77"
@@ -65,7 +65,7 @@ components:
 
 **Creative North Star: "The Case File"**
 
-The site reads like an investigator's evidence file laid on a cool lab bench. Each role is a lettered exhibit with a line drawing of its city; the hero's redaction bars clear on a half-life schedule; skills sit in an ATT&CK-style matrix where every cell names the evidence behind it. The metaphor exists to put proof in front of the reader, never to hide it.
+The site reads like an investigator's evidence file laid on clean white paper. Each role is a lettered exhibit with a line drawing of its city; the hero's redaction bars clear on a half-life schedule; skills sit in an ATT&CK-style matrix where every cell names the evidence behind it. The metaphor exists to put proof in front of the reader, never to hide it.
 
 Density is editorial: generous section spacing, a single reading measure, and a fixed side rail for navigation. Colour is almost entirely paper and ink, with one yellow evidence tag reserved for marking things.
 
@@ -83,8 +83,8 @@ Cool, quiet neutrals with a single high-visibility evidence-tag yellow.
 - **Evidence-Tag Yellow** (#f2c230): tags, focus rings, skip link and selected states. Text on it is **Tag Ink** (#1b1607).
 
 ### Neutral
-- **Lab Paper** (#eef1f3) / **Night Paper** (#11171e): page background in light / dark.
-- **Lab Paper Raised** (#f8f9fa) / (#172029): panels and cards lifted by tone, not shadow.
+- **Lab Paper** (#ffffff) / **Night Paper** (#11171e): page background in light / dark.
+- **Lab Paper Raised** (#f6f8fa) / (#172029): panels and cards lifted by tone, not shadow.
 - **Case Ink** (#142029) / **Night Ink** (#e4e9ed): primary text.
 - **Case Ink Soft** (#3a4a57) and **Muted Graphite** (#5d6b77): secondary text and metadata.
 - **Rule Line** (#c6cfd6) and **Rule Line Soft** (#dce2e7): dividers, link underlines at rest.

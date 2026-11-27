@@ -1,6 +1,6 @@
 /*
  * Design tokens: "Case file"
- * A cool lab-bench paper, ink, and one evidence-tag yellow used only for tags,
+ * Clean white paper, ink, and one evidence-tag yellow used only for tags,
  * focus and live-status marks. Archivo (variable width) carries structure;
  * Source Serif 4 carries reading; JetBrains Mono appears only on real
  * identifiers such as PR numbers and hashes.
@@ -11,8 +11,8 @@
 @import '@fontsource-variable/jetbrains-mono/index.css';
 
 :root {
-  --paper: #eef1f3;
-  --paper-raised: #f8f9fa;
+  --paper: #ffffff;
+  --paper-raised: #f6f8fa;
   --ink: #142029;
   --ink-soft: #3a4a57;
   --muted: #5d6b77;
@@ -96,7 +96,7 @@ body::before {
   inset: 0;
   z-index: 100;
   pointer-events: none;
-  opacity: var(--grain, 0.07);
+  opacity: var(--grain, 0.04);
   mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.3 0 0 0 0 0.3 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
