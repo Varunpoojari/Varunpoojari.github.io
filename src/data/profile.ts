@@ -21,7 +21,7 @@ export const person = {
     { label: 'GitHub', href: 'https://github.com/Varunpoojari', handle: 'Varunpoojari' },
     { label: 'LinkedIn', href: 'https://www.linkedin.com/in/varunpoojari/', handle: 'in/varunpoojari' },
     { label: 'Dev.to', href: 'https://dev.to/varun_poojari', handle: 'varun_poojari' },
-    { label: 'TryHackMe', href: 'https://tryhackme.com/p/VarunPoojari', handle: 'Top 2%' },
+    { label: 'TryHackMe', href: 'https://tryhackme.com/p/PhunsukhWangdu', handle: 'Top 2%' },
     { label: 'X', href: 'https://x.com/itsVarunPujary', handle: '@itsVarunPujary' },
   ],
 };
