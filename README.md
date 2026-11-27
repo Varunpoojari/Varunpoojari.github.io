@@ -31,6 +31,7 @@ src/
     Skyline.astro    ← original line drawings of Dublin, Pune, Bengaluru and Texas
     Work.astro       ← featured projects and project index (live stars and last push)
     Ledger.astro     ← open-source pull requests with live status
+    ContribGraph.astro ← GitHub contribution tiles (last six months), drawn at build time
     Matrix.astro     ← ATT&CK-style skills matrix with an evidence panel
     Writing.astro    ← Dev.to articles
     Credentials.astro, Places.astro, Contact.astro
@@ -57,7 +58,7 @@ npm run snapshot   # refresh src/data/snapshot.json from GitHub and Dev.to
 
 ## How the live data works
 
-1. **At build time**, `src/lib/live.ts` fetches repo stats, the state of every PR you authored, and your Dev.to articles. In CI it uses the workflow's `GITHUB_TOKEN`, so rate limits are not a concern.
+1. **At build time**, `src/lib/live.ts` fetches repo stats, the state of every PR you authored, your GitHub contribution calendar, and your Dev.to articles. In CI it uses the workflow's `GITHUB_TOKEN`, so rate limits are not a concern.
 2. **If any request fails**, that function returns `src/data/snapshot.json`. A network outage never breaks a build.
 3. **In the visitor's browser**, `Live.astro` re-checks the same endpoints. That's three requests, cached in `sessionStorage` for 30 minutes. A newly merged PR or a new article shows up without a rebuild. If those calls fail, the built values stay in place.
 4. The workflow also **rebuilds daily** (05:17 UTC), so the built HTML stays fresh too.

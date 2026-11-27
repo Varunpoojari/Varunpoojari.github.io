@@ -85,6 +85,41 @@ export async function getArticles(): Promise<Article[]> {
   }
 }
 
+export type ContributionDay = { date: string; count: number; level: number };
+
+/**
+ * GitHub's public contribution calendar (the green tiles on a profile).
+ * There is no unauthenticated API for it, so this reads the same HTML
+ * fragment the profile page loads, and falls back to the snapshot.
+ */
+export async function getContributions(): Promise<ContributionDay[]> {
+  try {
+    const res = await fetch(`https://github.com/users/${githubUser}/contributions`, {
+      headers: { 'User-Agent': 'varunpoojari-portfolio' },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) throw new Error(`contributions returned ${res.status}`);
+    const days = parseContributions(await res.text());
+    if (days.length < 300) throw new Error(`only ${days.length} days parsed`);
+    return days;
+  } catch (err) {
+    console.warn(`[live] contributions: using snapshot (${(err as Error).message})`);
+    return snapshot.contributions as ContributionDay[];
+  }
+}
+
+export function parseContributions(html: string): ContributionDay[] {
+  const byId = new Map<string, ContributionDay>();
+  for (const m of html.matchAll(/data-date="([\d-]+)" id="(contribution-day-component-\d+-\d+)" data-level="(\d)"/g)) {
+    byId.set(m[2], { date: m[1], count: 0, level: Number(m[3]) });
+  }
+  for (const m of html.matchAll(/for="(contribution-day-component-\d+-\d+)"[^>]*>\s*([\d,]+) contributions? on/g)) {
+    const day = byId.get(m[1]);
+    if (day) day.count = Number(m[2].replace(/,/g, ''));
+  }
+  return [...byId.values()].sort((a, b) => a.date.localeCompare(b.date));
+}
+
 export function prKey(item: { repository_url: string; number: number }): string {
   const repo = item.repository_url.replace('https://api.github.com/repos/', '');
   return `${repo}#${item.number}`;

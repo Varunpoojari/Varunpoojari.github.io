@@ -14,9 +14,9 @@ import Contact from '../components/Contact.astro';
 import Palette from '../components/Palette.astro';
 import Live from '../components/Live.astro';
 import Ctf from '../components/Ctf.astro';
-import { getRepos, getPrStates, getArticles } from '../lib/live';
+import { getRepos, getPrStates, getArticles, getContributions } from '../lib/live';
 
-const [repos, prs, articles] = await Promise.all([getRepos(), getPrStates(), getArticles()]);
+const [repos, prs, articles, days] = await Promise.all([getRepos(), getPrStates(), getArticles(), getContributions()]);
 ---
 
 <Base>
@@ -26,7 +26,7 @@ const [repos, prs, articles] = await Promise.all([getRepos(), getPrStates(), get
     <Ticker prs={prs} articles={articles} />
     <Timeline prs={prs} />
     <Work repos={repos} />
-    <Ledger prs={prs} />
+    <Ledger prs={prs} days={days} />
     <Matrix />
     <Writing articles={articles} />
     <Credentials />
